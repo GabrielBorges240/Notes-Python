@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anotações de Python — Gabriel Borges</title>
+<style>
+  :root{
+    --bg: #1b1b1b;
+    --bg-soft: #222222;
+    --card: #242424;
+    --card-border: #3a3a3a;
+    --card-border-hover: #d99a3d;
+    --text: #e7e3da;
+    --text-dim: #9a958a;
+    --text-faint: #6f6a60;
+    --accent: #e0a458;
+    --accent-dim: #b98644;
+    --mono: #7fb59e;
+    --divider: #333333;
+    --focus: #e0a458;
+    --radius: 10px;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: "SFMono-Regular", "Consolas", "Liberation Mono", Menlo, monospace;
+    line-height: 1.5;
+    padding: 48px 24px 96px;
+  }
+  .wrap{ max-width: 1120px; margin: 0 auto; }
+
+  header{ text-align:center; margin-bottom: 48px; }
+  header h1{
+    color: var(--accent);
+    font-size: 1.9rem;
+    letter-spacing: 1px;
+    margin: 0 0 10px;
+    font-weight: 700;
+  }
+  header p{
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  .section-label{
+    display:flex; align-items:center; gap:10px;
+    color: var(--text-dim);
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 40px 0 14px;
+  }
+  .section-label .n{ color: var(--accent-dim); }
+  .section-label::after{
+    content:""; flex:1; height:1px; background: var(--divider);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .card{
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 18px 18px 16px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+    color: inherit;
+    font-family: inherit;
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+    position: relative;
+  }
+  .card:hover, .card:focus-visible{
+    border-color: var(--card-border-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  }
+  .card:focus-visible{
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .card .icon{
+    font-size: 1.3rem;
+    color: var(--accent);
+    line-height:1;
+  }
+  .card h3{
+    margin: 0;
+    font-size: 0.96rem;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .card .tags{
+    color: var(--text-faint);
+    font-size: 0.74rem;
+    letter-spacing: .3px;
+    margin-top: auto;
+  }
+  .card .hint{
+    position:absolute; top:14px; right:16px;
+    font-size: .68rem; color: var(--text-faint);
+    opacity:0; transition: opacity .15s ease;
+  }
+  .card:hover .hint, .card:focus-visible .hint{ opacity:1; }
+
+  /* Modal */
+  .overlay{
+    position: fixed; inset:0;
+    background: var(--bg-soft);
+    display:none;
+    align-items:flex-start;
+    justify-content:center;
+    padding: 0;
+    z-index: 50;
+    overflow-y: auto;
+  }
+  .overlay.open{ display:flex; }
+
+  .modal{
+    background: var(--bg-soft);
+    border: none;
+    border-radius: 0;
+    max-width: 860px;
+    width: 100%;
+    min-height: 100vh;
+    padding: 32px 32px 60px;
+    animation: rise .18s ease;
+  }
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(8px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .modal-head{
+    display:flex; align-items:flex-start; justify-content:space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--divider);
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+    position: sticky;
+    top: 0;
+    background: var(--bg-soft);
+    padding-top: 8px;
+    margin-top: -8px;
+    z-index: 1;
+  }
+  .modal-head .icon{ font-size: 1.5rem; color: var(--accent); }
+  .modal-title{ display:flex; gap: 14px; align-items:flex-start; }
+  .modal-title h2{
+    margin: 0 0 4px; color: var(--accent); font-size: 1.25rem;
+  }
+  .modal-title .sub{ color: var(--text-dim); font-size: .78rem; letter-spacing: .5px; }
+
+  .close-btn{
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text-dim);
+    border-radius: 6px;
+    width: 30px; height: 30px;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .close-btn:hover, .close-btn:focus-visible{
+    border-color: var(--accent);
+    color: var(--accent);
+    outline: none;
+  }
+
+  .modal-body h4{
+    color: var(--mono);
+    font-size: .8rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 22px 0 8px;
+  }
+  .modal-body h4:first-child{ margin-top: 0; }
+  .modal-body ul{
+    margin: 0 0 4px; padding-left: 18px;
+    color: var(--text);
+    font-size: .88rem;
+  }
+  .modal-body li{ margin-bottom: 5px; }
+  .modal-body li b{ color: var(--text); }
+  .modal-body p{ font-size: .88rem; color: var(--text); margin: 0 0 8px; }
+
+  pre{
+    background: #1a1a1a;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    font-size: .82rem;
+    color: var(--mono);
+    margin: 6px 0 4px;
+  }
+  code{ color: var(--mono); }
+  .modal-body p code, .modal-body li code{
+    background: #1a1a1a;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: .84rem;
+  }
+
+  .pitfall{
+    margin-top: 18px;
+    border-left: 3px solid var(--accent-dim);
+    background: rgba(224,164,88,0.06);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    font-size: .84rem;
+  }
+  .pitfall b{ color: var(--accent); }
+
+  .exercicio{
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .exercicio .enunciado{
+    padding: 10px 14px;
+    font-size: .85rem;
+    color: var(--text);
+    background: #1f1f1f;
+  }
+  .exercicio .enunciado b{ color: var(--mono); }
+  .exercicio details{ border-top: 1px solid var(--card-border); }
+  .exercicio summary{
+    padding: 8px 14px;
+    font-size: .74rem;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    color: var(--accent-dim);
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+  }
+  .exercicio summary::-webkit-details-marker{ display:none; }
+  .exercicio summary::before{ content: "▸ "; }
+  .exercicio details[open] summary::before{ content: "▾ "; }
+  .exercicio summary:hover{ color: var(--accent); }
+  .exercicio .solucao{ padding: 2px 14px 12px; }
+  .exercicio .explicacao{
+    font-size: .82rem;
+    color: var(--text-dim);
+    margin: 6px 0 0;
+  }
+
+  .search-bar{
+    max-width: 420px;
+    margin: 0 auto 40px;
+    position: relative;
+  }
+  .search-bar input{
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: .85rem;
+    padding: 10px 14px 10px 34px;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color .15s ease;
+  }
+  .search-bar input::placeholder{ color: var(--text-faint); }
+  .search-bar input:focus{ border-color: var(--card-border-hover); }
+  .search-bar .icon{
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-faint);
+    font-size: .85rem;
+    pointer-events: none;
+  }
+  .search-bar .count{
+    text-align: center;
+    color: var(--text-faint);
+    font-size: .7rem;
+    margin-top: 8px;
+    letter-spacing: .5px;
+  }
+  .card.hidden{ display:none; }
+  .section-label.hidden{ display:none; }
+  .grid.hidden{ display:none; }
+  .no-results{
+    display:none;
+    text-align:center;
+    color: var(--text-faint);
+    font-size: .82rem;
+    padding: 40px 0;
+  }
+  .no-results.show{ display:block; }
+
+  footer{
+    text-align:center;
+    color: var(--text-faint);
+    font-size: .72rem;
+    margin-top: 56px;
+    letter-spacing: .5px;
+  }
+
+  @media (max-width: 480px){
+    body{ padding: 32px 14px 72px; }
+    .modal{ padding: 20px 16px 40px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Anotações de Python</h1>
+    <p>Gabriel Borges</p>
+  </header>
+
+  <div class="search-bar">
+    <span class="icon">⌕</span>
+    <input type="text" id="search-input" placeholder="Buscar por tópico, tag ou palavra-chave..." aria-label="Buscar anotações">
+    <div class="count" id="search-count"></div>
+  </div>
+
+  <div id="sections">
+  <div class="section-label" data-section="fundamentos"><span class="n">§</span> Fundamentos</div>
+  <div class="grid" id="grid-fundamentos" data-section="fundamentos"></div>
+
+  <div class="section-label" data-section="estruturas"><span class="n">§</span> Estruturas de Dados</div>
+  <div class="grid" id="grid-estruturas" data-section="estruturas"></div>
+
+  <div class="section-label" data-section="poo"><span class="n">§</span> Orientação a Objetos &amp; Erros</div>
+  <div class="grid" id="grid-poo" data-section="poo"></div>
+
+  <div class="section-label" data-section="ecossistema"><span class="n">§</span> Ecossistema &amp; Backend</div>
+  <div class="grid" id="grid-ecossistema" data-section="ecossistema"></div>
+
+  <div class="section-label" data-section="avancado"><span class="n">§</span> Recursos Avançados</div>
+  <div class="grid" id="grid-avancado" data-section="avancado"></div>
+  </div>
+
+  <div class="no-results" id="no-results">Nenhum tópico encontrado. Tente outra palavra-chave.</div>
+
+  <footer>Clique em qualquer card para abrir as anotações · Enter / Espaço também funciona</footer>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head">
+      <div class="modal-title">
+        <span class="icon" id="modal-icon"></span>
+        <div>
+          <h2 id="modal-title"></h2>
+          <div class="sub" id="modal-sub"></div>
+        </div>
+      </div>
+      <button class="close-btn" id="close-btn" type="button" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  fundamentos: [
+    {
+      icon:"⌗", title:"Sintaxe & Variáveis", tags:"tipos · indentação · f-strings",
+      sub:"Fundamentos",
+      sections:[
+        {h:"Tipagem", items:[
+          "Python é <b>dinamicamente tipado</b>: o tipo é da variável em tempo de execução, não declarado.",
+          "Tipos nativos: <code>int</code>, <code>float</code>, <code>str</code>, <code>bool</code>, <code>NoneType</code>.",
+          "Use <code>type(x)</code> para inspecionar e <code>isinstance(x, int)</code> para checar."
+        ]},
+        {h:"Indentação", items:[
+          "Blocos são definidos por indentação (4 espaços é a convenção PEP8), não por chaves.",
+          "Misturar tabs e espaços quebra o parser — configure o editor para converter tab em espaços."
+        ]},
+        {code:"nome = \"Gabriel\"\nidade = 21\naltura = 1.78\n\nprint(f\"{nome} tem {idade} anos e {altura:.2f}m\")"},
+        {h:"f-strings", items:[
+          "Preferíveis a <code>%</code> ou <code>.format()</code>: mais legíveis e mais rápidas.",
+          "Suportam expressões dentro das chaves: <code>f\"{a + b}\"</code>."
+        ]}
+      ],
+      pitfall:"Cuidado: <code>0.1 + 0.2 != 0.3</code> por causa de ponto flutuante. Para comparar floats, use <code>math.isclose()</code>.",
+      exercicios:[
+        {
+          enunciado:"Peça o nome e o ano de nascimento do usuário e imprima a idade aproximada dele em 2026, usando f-string.",
+          solucao:"nome = input(\"Nome: \")\nano_nascimento = int(input(\"Ano de nascimento: \"))\n\nidade = 2026 - ano_nascimento\nprint(f\"{nome} tem aproximadamente {idade} anos.\")",
+          explicacao:"input() sempre retorna string, por isso o ano precisa ser convertido com int() antes da subtração. A f-string insere a expressão idade diretamente no texto."
+        },
+        {
+          enunciado:"Dado um preço em reais (float), imprima o valor formatado com 2 casas decimais e o símbolo R$.",
+          solucao:"preco = 1234.5\nprint(f\"R$ {preco:.2f}\")",
+          explicacao:"O especificador :.2f dentro da f-string arredonda e formata o float com exatamente duas casas decimais — não precisa de round() manual."
+        }
+      ]
+    },
+    {
+      icon:"⌥", title:"Estruturas de Controle", tags:"if/elif/else · for · while",
+      sub:"Fundamentos",
+      sections:[
+        {h:"Condicionais", items:[
+          "Python não tem <code>switch</code> nativo (mas 3.10+ tem <code>match/case</code>).",
+          "Operadores lógicos são palavras: <code>and</code>, <code>or</code>, <code>not</code> — não <code>&&</code>/<code>||</code>."
+        ]},
+        {code:"idade = 20\nif idade >= 18 and idade < 65:\n    categoria = \"adulto\"\nelif idade >= 65:\n    categoria = \"idoso\"\nelse:\n    categoria = \"menor\""},
+        {h:"Laços", items:[
+          "<code>for</code> itera sobre qualquer iterável (não é laço de contador clássico).",
+          "<code>range(inicio, fim, passo)</code> gera sequência sem alocar lista inteira.",
+          "<code>while</code> + <code>break</code>/<code>continue</code> para controle fino.",
+          "Todo <code>for</code>/<code>while</code> aceita <code>else</code>: executa se não houve <code>break</code>."
+        ]},
+        {code:"for i in range(5):\n    if i == 3:\n        break\n    print(i)\nelse:\n    print(\"loop completo\")  # não roda, houve break"}
+      ],
+      pitfall:"Evite comparar booleanos com valores fixos tipo <code>if resultado == True</code>. A expressão lógica já <b>é</b> o valor — retorne/compare a condição diretamente em vez de codificar strings/valores prontos.",
+      exercicios:[
+        {
+          enunciado:"Escreva uma função par_ou_impar(n) que retorne a string \"par\" ou \"ímpar\" — sem usar if/else, apenas uma expressão lógica.",
+          solucao:"def par_ou_impar(n):\n    return \"par\" if n % 2 == 0 else \"ímpar\"\n\nprint(par_ou_impar(7))   # ímpar\nprint(par_ou_impar(10))  # par",
+          explicacao:"O operador ternário (valor_se_verdadeiro if condição else valor_se_falso) substitui um if/else de uma linha. Evita o erro comum de 'hardcodar' o retorno em vez de calcular a condição."
+        },
+        {
+          enunciado:"Some todos os números de 1 a 100 que sejam múltiplos de 3 ou 5, usando um único for.",
+          solucao:"total = 0\nfor n in range(1, 101):\n    if n % 3 == 0 or n % 5 == 0:\n        total += n\n\nprint(total)  # 2418",
+          explicacao:"O operador or garante que o número entre na soma se satisfizer qualquer uma das duas condições, sem precisar checar cada caso separadamente."
+        }
+      ]
+    },
+    {
+      icon:"ƒ", title:"Funções", tags:"*args · **kwargs · lambda",
+      sub:"Fundamentos",
+      sections:[
+        {h:"Definição", items:[
+          "Parâmetros podem ter valores padrão; use <code>None</code> como sentinela para mutáveis.",
+          "<code>*args</code> captura posicionais extras como tupla; <code>**kwargs</code> captura nomeados extras como dict."
+        ]},
+        {code:"def somar(*numeros, arredondar=False, **opcoes):\n    total = sum(numeros)\n    return round(total) if arredondar else total\n\nsomar(1, 2, 3, arredondar=True)"},
+        {h:"Escopo & closures", items:[
+          "Variáveis criadas dentro de uma função são locais por padrão.",
+          "<code>nonlocal</code> permite modificar variável de escopo externo (não global).",
+          "Funções são objetos de primeira classe: podem ser passadas, retornadas, guardadas em listas."
+        ]},
+        {h:"Type hints", items:[
+          "<code>def f(x: int) -> str:</code> não é reforçado em runtime, mas ajuda IDEs e ferramentas como <code>mypy</code>."
+        ]}
+      ],
+      pitfall:"Nunca use lista/dict como valor <b>padrão</b> mutável — <code>def f(x=[]):</code> compartilha a mesma lista entre chamadas. Use <code>x=None</code> e crie a lista dentro da função.",
+      exercicios:[
+        {
+          enunciado:"Escreva uma função media(*notas) que aceite qualquer quantidade de notas e retorne a média.",
+          solucao:"def media(*notas):\n    if not notas:\n        return 0\n    return sum(notas) / len(notas)\n\nprint(media(7, 8, 9))     # 8.0\nprint(media(10))          # 10.0",
+          explicacao:"*notas empacota todos os argumentos posicionais numa tupla, então a função funciona com 1, 3 ou 20 notas sem mudar a assinatura. O if not notas evita ZeroDivisionError se for chamada sem argumentos."
+        },
+        {
+          enunciado:"Crie uma função contador() que retorne uma outra função (closure) que incrementa e retorna um contador a cada chamada.",
+          solucao:"def contador():\n    n = 0\n    def incrementar():\n        nonlocal n\n        n += 1\n        return n\n    return incrementar\n\nprox = contador()\nprint(prox())  # 1\nprint(prox())  # 2\nprint(prox())  # 3",
+          explicacao:"incrementar 'lembra' da variável n do escopo de contador() mesmo depois que contador() já terminou de executar — isso é uma closure. nonlocal é necessário para modificar (não só ler) a variável do escopo externo."
+        }
+      ]
+    },
+    {
+      icon:"⇄", title:"Cálculo & Álgebra Linear", tags:"math · numpy · gradiente",
+      sub:"Fundamentos",
+      sections:[
+        {h:"Módulo math", items:[
+          "<code>math.sqrt</code>, <code>math.log</code>, <code>math.exp</code>, <code>math.isclose()</code> para comparação segura de floats."
+        ]},
+        {h:"NumPy para álgebra linear", items:[
+          "Vetores e matrizes viram <code>ndarray</code>; operações são vetorizadas (muito mais rápidas que loops puros).",
+          "Multiplicação de matriz usa <code>@</code> ou <code>np.dot()</code>, nunca <code>*</code> (que é elemento a elemento)."
+        ]},
+        {code:"import numpy as np\n\nA = np.array([[1, 2], [3, 4]])\nb = np.array([5, 6])\n\nx = A @ b          # produto matricial\ngrad = 2 * A.T @ (A @ x - b)  # passo de gradiente"},
+        {h:"Ligação com ML", items:[
+          "Gradiente descendente, no fundo, é apenas derivadas + atualização iterativa de parâmetros — vetorize sempre que possível em vez de laços <code>for</code>."
+        ]}
+      ],
+      exercicios:[
+        {
+          enunciado:"Dado o vetor v = [3, 4], calcule sua norma (magnitude) usando NumPy.",
+          solucao:"import numpy as np\n\nv = np.array([3, 4])\nnorma = np.linalg.norm(v)\nprint(norma)  # 5.0",
+          explicacao:"np.linalg.norm calcula a raiz quadrada da soma dos quadrados (aqui, √(3²+4²) = 5), sem precisar escrever a fórmula manualmente com math.sqrt."
+        },
+        {
+          enunciado:"Implemente um passo de gradiente descendente para minimizar f(x) = x², partindo de x=10, taxa de aprendizado 0.1, por 5 iterações.",
+          solucao:"x = 10.0\ntaxa = 0.1\n\nfor i in range(5):\n    gradiente = 2 * x       # derivada de x^2\n    x = x - taxa * gradiente\n    print(f\"iteração {i+1}: x = {x:.4f}\")",
+          explicacao:"A derivada de x² é 2x. A cada passo, x se move na direção oposta ao gradiente (por isso o sinal de menos), aproximando-se do mínimo em x=0."
+        }
+      ]
+    }
+  ],
+  estruturas: [
+    {
+      icon:"▤", title:"Listas, Tuplas & Sets", tags:"slicing · compreensão · mutabilidade",
+      sub:"Estruturas de Dados",
+      sections:[
+        {h:"Listas (mutáveis)", items:[
+          "Slicing: <code>lista[inicio:fim:passo]</code>, aceita índices negativos.",
+          "List comprehension é mais idiomática que <code>for</code> + <code>append</code> para transformações simples."
+        ]},
+        {code:"pares = [n for n in range(20) if n % 2 == 0]\nmatriz = [[i*j for j in range(3)] for i in range(3)]"},
+        {h:"Tuplas (imutáveis)", items:[
+          "Usadas para dados fixos e como chave de dicionário (listas não podem ser chave).",
+          "Desempacotamento: <code>a, b = b, a</code> troca valores sem variável temporária."
+        ]},
+        {h:"Sets", items:[
+          "Coleção não ordenada de elementos únicos — ótimo para checar pertencimento em O(1) e remover duplicatas.",
+          "Operações de conjunto: <code>a | b</code> (união), <code>a & b</code> (interseção), <code>a - b</code> (diferença)."
+        ]}
+      ],
+      pitfall:"<code>lista2 = lista1</code> copia a <b>referência</b>, não os dados. Para copiar de verdade use <code>lista1.copy()</code> ou <code>list(lista1)</code> (e <code>copy.deepcopy()</code> para listas aninhadas).",
+      exercicios:[
+        {
+          enunciado:"Dada a lista [5, 1, 4, 2, 8, 1], remova os duplicados e retorne ordenada, usando compreensão + set.",
+          solucao:"numeros = [5, 1, 4, 2, 8, 1]\nresultado = sorted(set(numeros))\nprint(resultado)  # [1, 2, 4, 5, 8]",
+          explicacao:"set() elimina duplicados automaticamente porque só guarda elementos únicos; sorted() converte de volta para lista já ordenada."
+        },
+        {
+          enunciado:"Dada uma lista de tuplas [(\"Ana\", 8.5), (\"Bruno\", 6.0), (\"Carla\", 9.2)], retorne só os nomes de quem tirou nota >= 7.",
+          solucao:"alunos = [(\"Ana\", 8.5), (\"Bruno\", 6.0), (\"Carla\", 9.2)]\naprovados = [nome for nome, nota in alunos if nota >= 7]\nprint(aprovados)  # ['Ana', 'Carla']",
+          explicacao:"O for dentro da list comprehension já desempacota cada tupla em nome e nota, então dá pra filtrar direto pela nota sem precisar de índices como tupla[1]."
+        }
+      ]
+    },
+    {
+      icon:"⎁", title:"Dicionários", tags:"hashmap · get · defaultdict",
+      sub:"Estruturas de Dados",
+      sections:[
+        {h:"Básico", items:[
+          "Implementado como hash table: acesso, inserção e remoção em O(1) médio.",
+          "Desde o Python 3.7, dicionários preservam a ordem de inserção."
+        ]},
+        {code:"contagem = {}\nfor palavra in texto.split():\n    contagem[palavra] = contagem.get(palavra, 0) + 1\n\n# equivalente mais limpo:\nfrom collections import defaultdict\ncontagem = defaultdict(int)\nfor palavra in texto.split():\n    contagem[palavra] += 1"},
+        {h:"Métodos úteis", items:[
+          "<code>.get(chave, padrao)</code> evita <code>KeyError</code>.",
+          "<code>.items()</code>, <code>.keys()</code>, <code>.values()</code> para iterar.",
+          "Dict comprehension: <code>{k: v*2 for k, v in d.items()}</code>."
+        ]}
+      ],
+      pitfall:"<code>dicionario[chave]</code> lança <code>KeyError</code> se a chave não existir. Prefira <code>.get()</code> quando o valor pode não estar presente.",
+      exercicios:[
+        {
+          enunciado:"Dada a frase \"o rato roeu a roupa do rei de roma\", conte a frequência de cada palavra e imprima a mais comum.",
+          solucao:"frase = \"o rato roeu a roupa do rei de roma\"\ncontagem = {}\nfor palavra in frase.split():\n    contagem[palavra] = contagem.get(palavra, 0) + 1\n\nmais_comum = max(contagem, key=contagem.get)\nprint(mais_comum, contagem[mais_comum])",
+          explicacao:"max(dict, key=dict.get) percorre as chaves do dicionário e escolhe a que tem o maior valor associado — padrão muito comum para 'achar o item mais frequente'."
+        },
+        {
+          enunciado:"Inverta um dicionário {\"a\": 1, \"b\": 2, \"c\": 3} para que os valores virem chaves e vice-versa.",
+          solucao:"original = {\"a\": 1, \"b\": 2, \"c\": 3}\ninvertido = {valor: chave for chave, valor in original.items()}\nprint(invertido)  # {1: 'a', 2: 'b', 3: 'c'}",
+          explicacao:"Dict comprehension percorre .items() e monta um novo dicionário trocando a posição de chave e valor. Só funciona bem se os valores originais forem únicos e hashable."
+        }
+      ]
+    },
+    {
+      icon:"⇅", title:"Ordenação & Busca", tags:"Big-O · sort · bisect",
+      sub:"Estruturas de Dados",
+      sections:[
+        {h:"Ordenação nativa", items:[
+          "<code>sorted(lista, key=..., reverse=...)</code> usa Timsort — O(n log n), estável.",
+          "<code>.sort()</code> ordena a lista in-place e retorna <code>None</code> (erro comum: <code>x = lista.sort()</code>)."
+        ]},
+        {code:"pessoas.sort(key=lambda p: (p.idade, p.nome))\nmais_novo = min(pessoas, key=lambda p: p.idade)"},
+        {h:"Busca binária", items:[
+          "Para listas já ordenadas, o módulo <code>bisect</code> encontra posição em O(log n) sem reimplementar o algoritmo."
+        ]},
+        {h:"Big-O que aparece direto", items:[
+          "Acesso por índice em lista: O(1). Busca por valor: O(n).",
+          "<code>in</code> em lista é O(n); <code>in</code> em set/dict é O(1) médio — trocar estrutura resolve muito gargalo."
+        ]}
+      ],
+      exercicios:[
+        {
+          enunciado:"Ordene uma lista de dicionários de alunos por nota decrescente, e em caso de empate, por nome crescente.",
+          solucao:"alunos = [\n    {\"nome\": \"Bruno\", \"nota\": 8},\n    {\"nome\": \"Ana\", \"nota\": 8},\n    {\"nome\": \"Carla\", \"nota\": 9},\n]\n\nordenado = sorted(alunos, key=lambda a: (-a[\"nota\"], a[\"nome\"]))\nfor a in ordenado:\n    print(a[\"nome\"], a[\"nota\"])",
+          explicacao:"key retorna uma tupla (-nota, nome): o sinal negativo inverte a ordem da nota para decrescente, enquanto o nome continua em ordem crescente normal — assim resolve os dois critérios numa só chamada de sorted."
+        },
+        {
+          enunciado:"Implemente busca binária manualmente numa lista ordenada para encontrar o índice de um valor (ou -1 se não existir).",
+          solucao:"def busca_binaria(lista, alvo):\n    esquerda, direita = 0, len(lista) - 1\n    while esquerda <= direita:\n        meio = (esquerda + direita) // 2\n        if lista[meio] == alvo:\n            return meio\n        elif lista[meio] < alvo:\n            esquerda = meio + 1\n        else:\n            direita = meio - 1\n    return -1\n\nprint(busca_binaria([1, 3, 5, 7, 9, 11], 7))  # 3",
+          explicacao:"A cada iteração descarta metade da lista comparando com o elemento do meio — complexidade O(log n), muito mais rápido que busca linear para listas grandes já ordenadas."
+        }
+      ]
+    },
+    {
+      icon:"⟁", title:"Hash, Heap, BST & AVL", tags:"árvores · balanceamento · heapq",
+      sub:"Estruturas de Dados",
+      sections:[
+        {h:"Heap (fila de prioridade)", items:[
+          "Módulo <code>heapq</code> implementa min-heap sobre uma lista comum.",
+          "Inserção e remoção do menor elemento em O(log n)."
+        ]},
+        {code:"import heapq\nfila = []\nheapq.heappush(fila, (2, \"tarefa B\"))\nheapq.heappush(fila, (1, \"tarefa A\"))\nprioridade = heapq.heappop(fila)  # (1, 'tarefa A')"},
+        {h:"BST / AVL (conceitual)", items:[
+          "BST: cada nó tem no máximo 2 filhos, esquerda < nó < direita — busca O(log n) no caso balanceado, O(n) no pior caso (árvore degenerada).",
+          "AVL é uma BST auto-balanceada: mantém a diferença de altura entre subárvores em no máximo 1, usando rotações."
+        ]},
+        {h:"Tabela hash", items:[
+          "Base do <code>dict</code>/<code>set</code> do Python: função hash mapeia chave → posição no array; colisões tratadas por open addressing."
+        ]}
+      ],
+      exercicios:[
+        {
+          enunciado:"Use heapq para encontrar os 3 maiores valores de uma lista sem ordenar a lista inteira.",
+          solucao:"import heapq\n\nnumeros = [4, 1, 9, 7, 3, 8, 2]\nmaiores = heapq.nlargest(3, numeros)\nprint(maiores)  # [9, 8, 7]",
+          explicacao:"heapq.nlargest usa uma heap internamente e é mais eficiente que sorted(numeros)[-3:] quando a lista é grande e você só precisa de poucos elementos."
+        },
+        {
+          enunciado:"Implemente a inserção em uma BST simples (sem balanceamento) usando uma classe Node.",
+          solucao:"class No:\n    def __init__(self, valor):\n        self.valor = valor\n        self.esquerda = None\n        self.direita = None\n\ndef inserir(raiz, valor):\n    if raiz is None:\n        return No(valor)\n    if valor < raiz.valor:\n        raiz.esquerda = inserir(raiz.esquerda, valor)\n    else:\n        raiz.direita = inserir(raiz.direita, valor)\n    return raiz\n\nraiz = None\nfor v in [5, 3, 8, 1, 4]:\n    raiz = inserir(raiz, v)",
+          explicacao:"A inserção é recursiva: compara o valor com o nó atual e desce para a esquerda (menor) ou direita (maior/igual) até achar um espaço vazio (None) para criar o novo nó."
+        }
+      ]
+    }
+  ],
+  poo: [
+    {
+      icon:"⊞", title:"POO em Python", tags:"classes · herança · dataclasses",
+      sub:"Orientação a Objetos",
+      sections:[
+        {h:"Classe básica", items:[
+          "<code>__init__</code> é o construtor; <code>self</code> é a instância atual (sempre explícito, diferente de outras linguagens).",
+          "Métodos com <code>__nome__</code> são \"dunder methods\" — protocolos especiais (<code>__str__</code>, <code>__eq__</code>, <code>__len__</code>)."
+        ]},
+        {code:"from dataclasses import dataclass\n\n@dataclass\nclass Usuario:\n    nome: str\n    idade: int\n    ativo: bool = True\n\n    def aniversario(self):\n        self.idade += 1"},
+        {h:"Herança", items:[
+          "<code>class Admin(Usuario):</code> herda atributos e métodos.",
+          "<code>super().__init__(...)</code> chama o construtor da classe pai.",
+          "Python permite herança múltipla — resolvida pela MRO (Method Resolution Order)."
+        ]},
+        {h:"Encapsulamento (convenção)", items:[
+          "Não existe <code>private</code> real: <code>_atributo</code> é \"protegido\" por convenção, <code>__atributo</code> ativa name mangling."
+        ]}
+      ],
+      pitfall:"<code>@dataclass</code> reduz boilerplate de <code>__init__</code>/<code>__repr__</code>/<code>__eq__</code>, mas ainda sofre com o mesmo problema de mutável-como-padrão: use <code>field(default_factory=list)</code>.",
+      exercicios:[
+        {
+          enunciado:"Crie uma classe ContaBancaria com saldo inicial, e métodos depositar(valor) e sacar(valor) que impeça saldo negativo.",
+          solucao:"class ContaBancaria:\n    def __init__(self, saldo=0):\n        self.saldo = saldo\n\n    def depositar(self, valor):\n        self.saldo += valor\n\n    def sacar(self, valor):\n        if valor > self.saldo:\n            raise ValueError(\"saldo insuficiente\")\n        self.saldo -= valor\n\nconta = ContaBancaria(100)\nconta.depositar(50)\nconta.sacar(30)\nprint(conta.saldo)  # 120",
+          explicacao:"O estado (saldo) fica dentro da instância via self, e a validação de regra de negócio (não permitir saldo negativo) mora dentro do método sacar, não espalhada pelo código que usa a classe."
+        },
+        {
+          enunciado:"Crie uma classe Animal com método fazer_som(), e duas subclasses Cachorro e Gato que sobrescrevem esse método (polimorfismo).",
+          solucao:"class Animal:\n    def fazer_som(self):\n        raise NotImplementedError\n\nclass Cachorro(Animal):\n    def fazer_som(self):\n        return \"Au au!\"\n\nclass Gato(Animal):\n    def fazer_som(self):\n        return \"Miau!\"\n\nfor animal in [Cachorro(), Gato()]:\n    print(animal.fazer_som())",
+          explicacao:"Cada subclasse implementa fazer_som() à sua maneira, mas o código que percorre a lista chama o mesmo método sem saber (nem precisar saber) qual classe concreta está por trás — isso é polimorfismo."
+        }
+      ]
+    },
+    {
+      icon:"⚑", title:"Tratamento de Exceções", tags:"try/except · raise · custom errors",
+      sub:"Orientação a Objetos",
+      sections:[
+        {h:"Estrutura", items:[
+          "<code>try / except / else / finally</code> — <code>else</code> roda se não houve exceção, <code>finally</code> roda sempre.",
+          "Capture exceções específicas primeiro; <code>except Exception:</code> genérico só como último recurso."
+        ]},
+        {code:"try:\n    resultado = 10 / divisor\nexcept ZeroDivisionError:\n    resultado = None\nexcept TypeError as e:\n    print(f\"tipo inválido: {e}\")\nelse:\n    print(\"deu certo\")\nfinally:\n    print(\"sempre executa\")"},
+        {h:"Exceções customizadas", items:[
+          "Crie subclasses de <code>Exception</code> para erros de domínio: mais expressivo que checar strings de erro.",
+          "<code>raise ValorInvalido(\"mensagem\") from erro_original</code> preserva a causa original."
+        ]},
+        {h:"Context managers", items:[
+          "<code>with open(arquivo) as f:</code> garante fechamento mesmo se der erro — evite gerenciar recursos manualmente com try/finally."
+        ]}
+      ],
+      exercicios:[
+        {
+          enunciado:"Escreva uma função dividir(a, b) que retorne o resultado ou uma mensagem de erro amigável se b for zero, sem deixar o programa quebrar.",
+          solucao:"def dividir(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return \"Erro: não é possível dividir por zero\"\n\nprint(dividir(10, 2))  # 5.0\nprint(dividir(10, 0))  # Erro: não é possível dividir por zero",
+          explicacao:"O try isola a operação arriscada; o except captura especificamente ZeroDivisionError (não um except genérico), então outros bugs inesperados continuam visíveis em vez de serem escondidos."
+        },
+        {
+          enunciado:"Crie uma exceção customizada SaldoInsuficienteError e lance-a numa função de saque quando o valor exceder o saldo.",
+          solucao:"class SaldoInsuficienteError(Exception):\n    pass\n\ndef sacar(saldo, valor):\n    if valor > saldo:\n        raise SaldoInsuficienteError(f\"saldo {saldo} é menor que {valor}\")\n    return saldo - valor\n\ntry:\n    sacar(100, 150)\nexcept SaldoInsuficienteError as e:\n    print(f\"Operação negada: {e}\")",
+          explicacao:"Uma exceção customizada deixa o código de quem chama a função mais expressivo: dá pra capturar especificamente esse erro de domínio em vez de um ValueError genérico que poderia significar qualquer coisa."
+        }
+      ]
+    }
+  ],
+  ecossistema: [
+    {
+      icon:"▣", title:"Módulos, Pacotes & venv", tags:"pip · requirements · imports",
+      sub:"Ecossistema",
+      sections:[
+        {h:"Ambientes virtuais", items:[
+          "Sempre isole dependências por projeto: <code>python -m venv .venv</code> e ative antes de instalar pacotes.",
+          "<code>pip freeze > requirements.txt</code> registra versões exatas para reprodutibilidade."
+        ]},
+        {code:"python -m venv .venv\nsource .venv/bin/activate   # Linux/Mac\npip install fastapi uvicorn sqlalchemy\npip freeze > requirements.txt"},
+        {h:"Imports", items:[
+          "Import absoluto (<code>from app.models import Usuario</code>) é preferível a relativo em projetos maiores.",
+          "<code>if __name__ == \"__main__\":</code> evita que código rode ao importar o módulo em outro lugar."
+        ]}
+      ],
+      exercicios:[
+        {
+          enunciado:"Crie um módulo utils.py com uma função saudacao(nome) e importe-o em outro arquivo usando import absoluto.",
+          solucao:"# utils.py\ndef saudacao(nome):\n    return f\"Olá, {nome}!\"\n\n\n# main.py\nfrom utils import saudacao\n\nif __name__ == \"__main__\":\n    print(saudacao(\"Gabriel\"))",
+          explicacao:"O bloco if __name__ == '__main__' só roda quando main.py é executado diretamente (não quando é importado por outro módulo), o que evita efeitos colaterais indesejados em imports."
+        },
+        {
+          enunciado:"Organize um pacote chamado app/ com dois módulos: app/models.py (classe Usuario) e app/services.py (função criar_usuario). Mostre os imports entre eles.",
+          solucao:"# app/__init__.py\n# (arquivo vazio, apenas marca app/ como pacote)\n\n# app/models.py\nclass Usuario:\n    def __init__(self, nome):\n        self.nome = nome\n\n# app/services.py\nfrom app.models import Usuario\n\ndef criar_usuario(nome):\n    return Usuario(nome)\n\n# main.py (na raiz do projeto)\nfrom app.services import criar_usuario\n\nusuario = criar_usuario(\"Gabriel\")\nprint(usuario.nome)",
+          explicacao:"O arquivo __init__.py (mesmo vazio) marca a pasta app/ como um pacote Python importável. O import absoluto from app.models import Usuario funciona porque main.py está na raiz do projeto, no mesmo nível de app/."
+        }
+      ]
+    },
+    {
+      icon:"✓", title:"Testes com pytest", tags:"fixtures · asserts · TDD",
+      sub:"Ecossistema",
+      sections:[
+        {h:"Estrutura básica", items:[
+          "Arquivos <code>test_*.py</code>, funções <code>test_*</code> — pytest descobre e roda automaticamente.",
+          "Use <code>assert</code> simples; pytest reescreve para mostrar diffs detalhados na falha."
+        ]},
+        {code:"import pytest\n\ndef test_soma():\n    assert somar(2, 3) == 5\n\n@pytest.fixture\ndef cliente_api():\n    from fastapi.testclient import TestClient\n    return TestClient(app)\n\ndef test_endpoint(cliente_api):\n    resp = cliente_api.get(\"/status\")\n    assert resp.status_code == 200"},
+        {h:"Fixtures & parametrize", items:[
+          "Fixtures compartilham setup entre testes sem duplicar código.",
+          "<code>@pytest.mark.parametrize</code> roda o mesmo teste com várias entradas diferentes."
+        ]}
+      ],
+      pitfall:"Testes que dependem de ordem de execução ou de estado global costumam quebrar silenciosamente. Cada teste deve poder rodar isolado — fixtures com <code>yield</code> ajudam a limpar estado depois.",
+      exercicios:[
+        {
+          enunciado:"Escreva testes parametrizados para uma função eh_par(n) cobrindo pares, ímpares e zero.",
+          solucao:"def eh_par(n):\n    return n % 2 == 0\n\n\n# test_par.py\nimport pytest\n\n@pytest.mark.parametrize(\"numero, esperado\", [\n    (2, True),\n    (3, False),\n    (0, True),\n    (-4, True),\n])\ndef test_eh_par(numero, esperado):\n    assert eh_par(numero) == esperado",
+          explicacao:"parametrize gera 4 casos de teste independentes a partir de uma única função — se um caso falhar, o pytest mostra exatamente qual combinação (numero, esperado) quebrou."
+        },
+        {
+          enunciado:"Use uma fixture para criar uma lista de tarefas antes de cada teste, garantindo que cada teste comece do mesmo estado.",
+          solucao:"import pytest\n\n@pytest.fixture\ndef tarefas():\n    return [\"Estudar\", \"Fazer exercícios\", \"Revisar\"]\n\ndef test_tamanho_inicial(tarefas):\n    assert len(tarefas) == 3\n\ndef test_adicionar_tarefa(tarefas):\n    tarefas.append(\"Descansar\")\n    assert \"Descansar\" in tarefas\n    assert len(tarefas) == 4",
+          explicacao:"A fixture tarefas roda de novo para cada função de teste que a recebe como parâmetro, então test_adicionar_tarefa não afeta o estado inicial visto por test_tamanho_inicial — cada teste fica isolado."
+        }
+      ]
+    },
+    {
+      icon:"⇌", title:"Web & APIs com FastAPI", tags:"REST · Pydantic · JWT",
+      sub:"Ecossistema",
+      sections:[
+        {h:"Rota básica", items:[
+          "Tipagem dos parâmetros gera validação automática + documentação Swagger em <code>/docs</code>."
+        ]},
+        {code:"from fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\nclass Tarefa(BaseModel):\n    titulo: str\n    concluida: bool = False\n\n@app.post(\"/tarefas\")\nasync def criar_tarefa(tarefa: Tarefa):\n    return {\"id\": 1, **tarefa.model_dump()}"},
+        {h:"Async", items:[
+          "<code>async def</code> libera a thread durante I/O (DB, chamadas HTTP) — use <code>await</code> em toda operação assíncrona, senão o ganho desaparece."
+        ]},
+        {h:"Autenticação JWT", items:[
+          "Fluxo típico: login gera token assinado → cliente envia no header <code>Authorization: Bearer</code> → dependência do FastAPI decodifica e injeta o usuário na rota."
+        ]}
+      ],
+      exercicios:[
+        {
+          enunciado:"Crie uma rota GET /tarefas/{id} que retorne 404 se o id não existir numa lista fixa de tarefas em memória.",
+          solucao:"from fastapi import FastAPI, HTTPException\n\napp = FastAPI()\ntarefas = {1: \"Estudar FastAPI\", 2: \"Fazer exercícios\"}\n\n@app.get(\"/tarefas/{id}\")\nasync def obter_tarefa(id: int):\n    if id not in tarefas:\n        raise HTTPException(status_code=404, detail=\"Tarefa não encontrada\")\n    return {\"id\": id, \"titulo\": tarefas[id]}",
+          explicacao:"HTTPException é a forma correta de retornar erros HTTP no FastAPI — ele automaticamente serializa o status_code e o detail como resposta JSON, sem precisar montar a resposta manualmente."
+        },
+        {
+          enunciado:"Crie um modelo Pydantic Usuario com campos nome (str) e idade (int, deve ser >= 0) e uma rota POST que valide e retorne o usuário criado.",
+          solucao:"from fastapi import FastAPI\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\n\nclass Usuario(BaseModel):\n    nome: str\n    idade: int = Field(ge=0)\n\n@app.post(\"/usuarios\")\nasync def criar_usuario(usuario: Usuario):\n    return usuario",
+          explicacao:"Field(ge=0) declara a restrição direto no schema Pydantic (idade 'greater or equal' a 0). Se alguém enviar idade negativa, o FastAPI já retorna 422 automaticamente, sem precisar validar manualmente dentro da rota."
+        }
+      ]
+    },
+    {
+      icon:"⌬", title:"Banco de Dados: SQLAlchemy", tags:"ORM · PostgreSQL · migrations",
+      sub:"Ecossistema",
+      sections:[
+        {h:"Modelo ORM", items:[
+          "Cada classe mapeia uma tabela; SQLAlchemy traduz operações Python em SQL."
+        ]},
+        {code:"from sqlalchemy.orm import declarative_base, Session\nfrom sqlalchemy import Column, Integer, String\n\nBase = declarative_base()\n\nclass Usuario(Base):\n    __tablename__ = \"usuarios\"\n    id = Column(Integer, primary_key=True)\n    nome = Column(String, nullable=False)"},
+        {h:"Sessões & transações", items:[
+          "Uma <code>Session</code> por requisição é o padrão em APIs — evita vazamento de estado entre usuários.",
+          "<code>session.commit()</code> confirma; <code>session.rollback()</code> desfaz em caso de erro."
+        ]},
+        {h:"Migrations com Alembic", items:[
+          "Alembic versiona mudanças de schema como código, permitindo aplicar/reverter em qualquer ambiente de forma reprodutível."
+        ]}
+      ],
+      exercicios:[
+        {
+          enunciado:"Escreva uma consulta com SQLAlchemy que busque todos os usuários cujo nome comece com 'A', ordenados por nome.",
+          solucao:"from sqlalchemy import select\n\nstmt = (\n    select(Usuario)\n    .where(Usuario.nome.startswith(\"A\"))\n    .order_by(Usuario.nome)\n)\n\nresultado = session.execute(stmt).scalars().all()\nfor usuario in resultado:\n    print(usuario.nome)",
+          explicacao:"A API 'select' do SQLAlchemy 2.0 monta a query de forma declarativa em Python; .scalars().all() retorna diretamente os objetos Usuario, sem precisar acessar tuplas de resultado."
+        },
+        {
+          enunciado:"Crie e salve um novo usuário no banco, tratando o caso de erro com rollback.",
+          solucao:"novo_usuario = Usuario(nome=\"Gabriel\")\n\ntry:\n    session.add(novo_usuario)\n    session.commit()\nexcept Exception:\n    session.rollback()\n    raise\nfinally:\n    session.close()",
+          explicacao:"session.add() apenas marca o objeto para inserção; só o commit() de fato grava no banco. Se algo falhar entre o add e o commit, rollback() desfaz a transação para não deixar a sessão num estado inconsistente."
+        }
+      ]
+    }
+  ],
+  avancado: [
+    {
+      icon:"❝", title:"Strings Avançado", tags:"métodos · slicing · regex",
+      sub:"Recursos Avançados",
+      sections:[
+        {h:"Métodos essenciais", items:[
+          "Strings são imutáveis: todo método (<code>.upper()</code>, <code>.replace()</code>, <code>.strip()</code>) retorna uma <b>nova</b> string.",
+          "<code>.split(sep)</code> quebra em lista; <code>\" \".join(lista)</code> faz o caminho inverso.",
+          "<code>.find()</code> retorna -1 se não achar; <code>.index()</code> lança exceção — escolha conforme o caso."
+        ]},
+        {code:"texto = \"  Python é ótimo  \"\nlimpo = texto.strip().lower()\npalavras = limpo.split()\nfrase = \"-\".join(palavras)\nprint(frase)  # 'python-é-ótimo'"},
+        {h:"Expressões regulares (re)", items:[
+          "<code>re.search()</code> acha a primeira ocorrência em qualquer posição; <code>re.match()</code> só casa no início da string.",
+          "<code>re.findall()</code> retorna todas as ocorrências como lista.",
+          "Para padrões usados repetidamente, <code>re.compile(padrao)</code> evita recompilar a cada chamada."
+        ]}
+      ],
+      pitfall:"Concatenar strings com <code>+</code> dentro de um loop é O(n²) porque cria uma nova string a cada iteração. Para juntar muitos pedaços, acumule numa lista e use <code>\"\".join(lista)</code> no final.",
+      exercicios:[
+        {
+          enunciado:"Escreva uma função que conte quantas vogais existem numa frase, ignorando maiúsculas/minúsculas.",
+          solucao:"def contar_vogais(frase):\n    vogais = \"aeiou\"\n    return sum(1 for letra in frase.lower() if letra in vogais)\n\nprint(contar_vogais(\"Python é Divertido\"))  # 6",
+          explicacao:"frase.lower() normaliza o texto antes de comparar, e a generator expression dentro do sum() conta 1 para cada letra que está no conjunto de vogais, sem precisar de um contador manual."
+        },
+        {
+          enunciado:"Valide se uma string é um e-mail simples no formato usuario@dominio.com usando regex.",
+          solucao:"import re\n\npadrao = re.compile(r\"^[\\w.]+@[\\w]+\\.\\w+$\")\n\ndef eh_email_valido(texto):\n    return bool(padrao.match(texto))\n\nprint(eh_email_valido(\"gabriel@ufms.br\"))   # True\nprint(eh_email_valido(\"invalido@@x\"))       # False",
+          explicacao:"O padrão exige: caracteres de palavra/ponto antes do @, um domínio sem espaços, um ponto e uma extensão. re.compile() pré-compila o padrão para reuso eficiente se a função for chamada muitas vezes."
+        }
+      ]
+    },
+    {
+      icon:"⟦", title:"Compreensões & Geradoras", tags:"list · dict · set · genexpr",
+      sub:"Recursos Avançados",
+      sections:[
+        {h:"List / Dict / Set comprehension", items:[
+          "Forma geral: <code>[expressao for item in iteravel if condicao]</code> — substitui um <code>for</code> + <code>append</code> em uma linha legível.",
+          "Funciona igual para dict (<code>{k: v for ...}</code>) e set (<code>{x for ...}</code>)."
+        ]},
+        {code:"matriz = [[1, 2], [3, 4], [5, 6]]\ntransposta = [[linha[i] for linha in matriz] for i in range(2)]\nprint(transposta)  # [[1, 3, 5], [2, 4, 6]]"},
+        {h:"Expressões geradoras", items:[
+          "<code>(x*2 for x in lista)</code> com parênteses cria um <b>gerador</b>: calcula item por item sob demanda, sem guardar tudo na memória.",
+          "Ideal para somar/filtrar grandes volumes de dados: <code>sum(x for x in numeros if x > 0)</code>."
+        ]}
+      ],
+      pitfall:"Compreensões aninhadas em mais de 2 níveis ficam difíceis de ler. Se passar disso, prefira um <code>for</code> explícito — legibilidade importa mais que a linha única.",
+      exercicios:[
+        {
+          enunciado:"Dada uma lista de dicionários de produtos, crie um dicionário indexado pelo id de cada produto.",
+          solucao:"produtos = [\n    {\"id\": 1, \"nome\": \"Teclado\"},\n    {\"id\": 2, \"nome\": \"Mouse\"},\n]\n\npor_id = {p[\"id\"]: p for p in produtos}\nprint(por_id[2])  # {'id': 2, 'nome': 'Mouse'}",
+          explicacao:"O dict comprehension usa o id de cada produto como chave e o próprio dicionário do produto como valor, permitindo acesso O(1) por id em vez de percorrer a lista toda."
+        },
+        {
+          enunciado:"Use uma expressão geradora para encontrar a soma dos quadrados dos números pares de 1 a 1000, sem criar uma lista intermediária.",
+          solucao:"soma = sum(n**2 for n in range(1, 1001) if n % 2 == 0)\nprint(soma)",
+          explicacao:"Sem os colchetes, a expressão dentro de sum() é uma generator expression: os quadrados são calculados um de cada vez e somados imediatamente, sem alocar uma lista de 500 elementos na memória."
+        }
+      ]
+    },
+    {
+      icon:"λ", title:"Lambda & Funcional", tags:"map · filter · reduce",
+      sub:"Recursos Avançados",
+      sections:[
+        {h:"Funções lambda", items:[
+          "<code>lambda parametros: expressao</code> cria uma função anônima de uma única expressão (sem <code>return</code> explícito).",
+          "Úteis como argumento rápido para <code>sorted()</code>, <code>map()</code>, <code>filter()</code> — evite atribuir a uma variável (use <code>def</code> nesse caso)."
+        ]},
+        {code:"celsius = [0, 20, 37, 100]\nfahrenheit = list(map(lambda c: c * 9/5 + 32, celsius))\nprint(fahrenheit)  # [32.0, 68.0, 98.6, 212.0]"},
+        {h:"map, filter e functools", items:[
+          "<code>map(funcao, iteravel)</code> aplica a função a cada item; <code>filter(funcao, iteravel)</code> mantém só os que retornam <code>True</code>.",
+          "<code>functools.reduce(funcao, iteravel)</code> acumula um valor único aplicando a função par a par.",
+          "<code>functools.partial</code> \"congela\" alguns argumentos de uma função, criando uma versão especializada dela."
+        ]}
+      ],
+      pitfall:"Encadear muitos <code>map</code>/<code>filter</code> deixa o código difícil de ler em Python. Frequentemente uma list comprehension com <code>if</code> é mais clara e igualmente eficiente.",
+      exercicios:[
+        {
+          enunciado:"Use filter + lambda para extrair só os números primos de uma lista de 2 a 30 (considerando uma função eh_primo já pronta).",
+          solucao:"def eh_primo(n):\n    if n < 2:\n        return False\n    return all(n % i != 0 for i in range(2, int(n**0.5) + 1))\n\nnumeros = list(range(2, 31))\nprimos = list(filter(eh_primo, numeros))\nprint(primos)  # [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]",
+          explicacao:"filter(eh_primo, numeros) percorre a lista e mantém apenas os elementos para os quais eh_primo retorna True, sem precisar de um loop com append manual."
+        },
+        {
+          enunciado:"Use functools.reduce para calcular o fatorial de um número.",
+          solucao:"from functools import reduce\n\ndef fatorial(n):\n    return reduce(lambda acc, x: acc * x, range(1, n + 1), 1)\n\nprint(fatorial(5))  # 120",
+          explicacao:"reduce aplica a lambda acumulando o resultado a cada passo: começa em 1 (valor inicial) e multiplica sucessivamente por 1, 2, 3, 4, 5 até sobrar um único valor final."
+        }
+      ]
+    },
+    {
+      icon:"↻", title:"Iteradores & Geradores", tags:"yield · __iter__ · __next__",
+      sub:"Recursos Avançados",
+      sections:[
+        {h:"Protocolo de iteração", items:[
+          "Um objeto iterável implementa <code>__iter__</code>; um iterador implementa <code>__iter__</code> e <code>__next__</code>, lançando <code>StopIteration</code> quando acaba.",
+          "É esse protocolo que faz o <code>for item in objeto:</code> funcionar por baixo dos panos."
+        ]},
+        {code:"class Contagem:\n    def __init__(self, inicio):\n        self.atual = inicio\n\n    def __iter__(self):\n        return self\n\n    def __next__(self):\n        if self.atual <= 0:\n            raise StopIteration\n        valor = self.atual\n        self.atual -= 1\n        return valor\n\nfor n in Contagem(3):\n    print(n)  # 3, 2, 1"},
+        {h:"Funções geradoras (yield)", items:[
+          "Uma função com <code>yield</code> vira um gerador: cada chamada a <code>next()</code> roda até o próximo <code>yield</code> e pausa ali, mantendo o estado.",
+          "Muito mais eficiente em memória que retornar uma lista gigante, pois gera os valores sob demanda (lazy evaluation)."
+        ]}
+      ],
+      pitfall:"Um gerador só pode ser percorrido <b>uma vez</b> — depois de esgotado, um novo <code>for</code> nele não produz nada. Se precisar reutilizar os valores, converta para lista ou recrie o gerador.",
+      exercicios:[
+        {
+          enunciado:"Escreva um gerador infinito de números de Fibonacci usando yield.",
+          solucao:"def fibonacci():\n    a, b = 0, 1\n    while True:\n        yield a\n        a, b = b, a + b\n\ngen = fibonacci()\nprimeiros_10 = [next(gen) for _ in range(10)]\nprint(primeiros_10)  # [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]",
+          explicacao:"Como o gerador é 'infinito' (while True), ele nunca terminaria se fosse uma lista normal. Com yield, cada valor só é calculado quando next() é chamado, então dá pra pegar só os 10 primeiros sem travar."
+        },
+        {
+          enunciado:"Crie uma classe ContagemRegressiva que funcione como iterador, contando de N até 1.",
+          solucao:"class ContagemRegressiva:\n    def __init__(self, n):\n        self.n = n\n\n    def __iter__(self):\n        return self\n\n    def __next__(self):\n        if self.n <= 0:\n            raise StopIteration\n        valor = self.n\n        self.n -= 1\n        return valor\n\nfor v in ContagemRegressiva(5):\n    print(v)  # 5, 4, 3, 2, 1",
+          explicacao:"__next__ é chamado automaticamente a cada volta do for; quando levanta StopIteration, o Python entende que o loop deve parar — não é um erro, é o sinal de fim de iteração."
+        }
+      ]
+    },
+    {
+      icon:"@", title:"Decoradores", tags:"functools.wraps · closures",
+      sub:"Recursos Avançados",
+      sections:[
+        {h:"O que é um decorador", items:[
+          "É uma função que recebe outra função e retorna uma versão modificada dela — a sintaxe <code>@decorador</code> antes de <code>def</code> é açúcar sintático para <code>funcao = decorador(funcao)</code>.",
+          "Usa <code>*args, **kwargs</code> na função interna para funcionar com qualquer assinatura."
+        ]},
+        {code:"import functools\nimport time\n\ndef cronometrar(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        inicio = time.perf_counter()\n        resultado = func(*args, **kwargs)\n        duracao = time.perf_counter() - inicio\n        print(f\"{func.__name__} levou {duracao:.4f}s\")\n        return resultado\n    return wrapper\n\n@cronometrar\ndef processar(n):\n    return sum(range(n))"},
+        {h:"Decoradores com parâmetros", items:[
+          "Para o decorador aceitar argumentos próprios, é preciso uma camada extra de função (uma \"fábrica de decoradores\")."
+        ]}
+      ],
+      pitfall:"Esquecer <code>@functools.wraps(func)</code> faz a função decorada perder o <code>__name__</code> e a docstring originais, o que atrapalha debugging e ferramentas de documentação.",
+      exercicios:[
+        {
+          enunciado:"Crie um decorador que registre (print) o nome da função e os argumentos toda vez que ela for chamada.",
+          solucao:"import functools\n\ndef registrar_chamada(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        print(f\"Chamando {func.__name__} com args={args}, kwargs={kwargs}\")\n        return func(*args, **kwargs)\n    return wrapper\n\n@registrar_chamada\ndef somar(a, b):\n    return a + b\n\nsomar(2, 3)  # Chamando somar com args=(2, 3), kwargs={}",
+          explicacao:"O wrapper intercepta a chamada, imprime o log e só então delega para a função original com func(*args, **kwargs) — o comportamento original é preservado, só ganha o efeito colateral do log."
+        },
+        {
+          enunciado:"Crie um decorador repetir(n) que executa a função decorada n vezes seguidas.",
+          solucao:"import functools\n\ndef repetir(n):\n    def decorador(func):\n        @functools.wraps(func)\n        def wrapper(*args, **kwargs):\n            resultado = None\n            for _ in range(n):\n                resultado = func(*args, **kwargs)\n            return resultado\n        return wrapper\n    return decorador\n\n@repetir(3)\ndef saudacao():\n    print(\"Olá!\")\n\nsaudacao()  # imprime 'Olá!' três vezes",
+          explicacao:"repetir(3) é a fábrica: ela recebe o parâmetro n e retorna o decorador de verdade, que por sua vez recebe a função e retorna o wrapper. Essa camada extra é o que permite @repetir(3) em vez de só @repetir."
+        }
+      ]
+    },
+    {
+      icon:"⎘", title:"Arquivos & I/O", tags:"open · json · pathlib",
+      sub:"Recursos Avançados",
+      sections:[
+        {h:"Abrindo arquivos", items:[
+          "<code>with open(caminho, modo, encoding=\"utf-8\") as f:</code> garante o fechamento automático, mesmo se der erro no meio.",
+          "Modos comuns: <code>\"r\"</code> leitura, <code>\"w\"</code> escrita (sobrescreve), <code>\"a\"</code> anexa ao final."
+        ]},
+        {code:"with open(\"dados.txt\", \"w\", encoding=\"utf-8\") as f:\n    f.write(\"primeira linha\\n\")\n    f.write(\"segunda linha\\n\")\n\nwith open(\"dados.txt\", \"r\", encoding=\"utf-8\") as f:\n    for linha in f:\n        print(linha.strip())"},
+        {h:"JSON", items:[
+          "<code>json.dump(obj, f)</code> escreve um dicionário/lista como JSON no arquivo; <code>json.load(f)</code> faz o caminho inverso."
+        ]},
+        {h:"pathlib (forma moderna)", items:[
+          "<code>from pathlib import Path</code> — <code>Path(\"pasta\") / \"arquivo.txt\"</code> constrói caminhos de forma independente de sistema operacional, substituindo <code>os.path.join</code>."
+        ]}
+      ],
+      pitfall:"Não especificar <code>encoding=\"utf-8\"</code> pode causar erro ou corromper acentos, especialmente no Windows, onde o encoding padrão do sistema pode ser diferente de UTF-8.",
+      exercicios:[
+        {
+          enunciado:"Leia um arquivo CSV simples (uma coluna numérica por linha, sem cabeçalho) e some todos os valores.",
+          solucao:"total = 0\nwith open(\"valores.csv\", \"r\", encoding=\"utf-8\") as f:\n    for linha in f:\n        linha = linha.strip()\n        if linha:\n            total += float(linha)\n\nprint(total)",
+          explicacao:"Cada linha do arquivo vem com uma quebra de linha no final, por isso strip() antes de converter para float. O if linha evita erro ao tentar converter uma linha vazia no fim do arquivo."
+        },
+        {
+          enunciado:"Salve um dicionário de configurações como JSON e depois recarregue-o de volta em memória.",
+          solucao:"import json\n\nconfig = {\"tema\": \"escuro\", \"notificacoes\": True, \"limite\": 100}\n\nwith open(\"config.json\", \"w\", encoding=\"utf-8\") as f:\n    json.dump(config, f, indent=2, ensure_ascii=False)\n\nwith open(\"config.json\", \"r\", encoding=\"utf-8\") as f:\n    config_carregado = json.load(f)\n\nprint(config_carregado[\"tema\"])  # escuro",
+          explicacao:"indent=2 deixa o JSON legível para humanos, e ensure_ascii=False preserva acentos em vez de escapá-los como \\uXXXX. json.load reconstrói o dicionário Python original a partir do arquivo."
+        }
+      ]
+    },
+    {
+      icon:"▦", title:"Módulos Padrão Úteis", tags:"datetime · collections · itertools",
+      sub:"Recursos Avançados",
+      sections:[
+        {h:"datetime", items:[
+          "<code>datetime.now()</code> retorna data/hora atual; <code>timedelta</code> representa uma duração e permite somar/subtrair de datas."
+        ]},
+        {code:"from datetime import datetime, timedelta\n\nagora = datetime.now()\ndaqui_7_dias = agora + timedelta(days=7)\nprint(daqui_7_dias.strftime(\"%d/%m/%Y\"))"},
+        {h:"collections", items:[
+          "<code>Counter</code> conta ocorrências de itens automaticamente; <code>.most_common(n)</code> retorna os n mais frequentes.",
+          "<code>defaultdict(tipo)</code> cria um valor padrão automaticamente para chaves novas, evitando checagens manuais.",
+          "<code>namedtuple</code> cria tuplas com campos nomeados, mais legíveis que índices numéricos."
+        ]},
+        {h:"itertools", items:[
+          "<code>combinations(iteravel, r)</code> e <code>permutations(iteravel, r)</code> geram agrupamentos sem reimplementar o algoritmo.",
+          "<code>chain(lista1, lista2)</code> encadeia iteráveis sem criar uma lista concatenada intermediária."
+        ]}
+      ],
+      exercicios:[
+        {
+          enunciado:"Use collections.Counter para encontrar as 2 palavras mais frequentes num texto.",
+          solucao:"from collections import Counter\n\ntexto = \"python é ótimo python é fácil python vale a pena\"\ncontador = Counter(texto.split())\nprint(contador.most_common(2))  # [('python', 3), ('é', 2)]",
+          explicacao:"Counter(iteravel) já conta as ocorrências de cada item automaticamente; most_common(2) ordena do mais para o menos frequente e retorna só os 2 primeiros, sem precisar de sorted() manual."
+        },
+        {
+          enunciado:"Use itertools.combinations para gerar todos os pares possíveis de uma lista de 4 jogadores para uma partida de dupla.",
+          solucao:"from itertools import combinations\n\njogadores = [\"Ana\", \"Bruno\", \"Carla\", \"Diego\"]\npares = list(combinations(jogadores, 2))\nfor par in pares:\n    print(par)\n# ('Ana', 'Bruno'), ('Ana', 'Carla'), ('Ana', 'Diego'),\n# ('Bruno', 'Carla'), ('Bruno', 'Diego'), ('Carla', 'Diego')",
+          explicacao:"combinations(lista, 2) gera todas as duplas possíveis sem repetir a ordem (ou seja, ('Ana','Bruno') aparece, mas não ('Bruno','Ana') de novo) — exatamente o que se espera de combinações, ao contrário de permutações."
+        }
+      ]
+    },
+    {
+      icon:"⇶", title:"Async & Concorrência", tags:"asyncio · threading · GIL",
+      sub:"Recursos Avançados",
+      sections:[
+        {h:"GIL (Global Interpreter Lock)", items:[
+          "O CPython só executa bytecode Python de uma thread por vez, mesmo em máquinas multi-core.",
+          "Por isso: <code>threading</code> ajuda em tarefas de I/O (rede, disco), mas não acelera código CPU-bound — para isso use <code>multiprocessing</code>."
+        ]},
+        {h:"asyncio", items:[
+          "<code>async def</code> define uma corrotina; <code>await</code> pausa a execução até a operação assíncrona terminar, liberando o event loop para outras tarefas.",
+          "<code>asyncio.gather(tarefa1, tarefa2)</code> roda várias corrotinas concorrentemente e espera todas terminarem."
+        ]},
+        {code:"import asyncio\n\nasync def buscar_dado(id, atraso):\n    await asyncio.sleep(atraso)\n    return f\"dado {id}\"\n\nasync def main():\n    resultados = await asyncio.gather(\n        buscar_dado(1, 2),\n        buscar_dado(2, 1),\n    )\n    print(resultados)\n\nasyncio.run(main())"}
+      ],
+      pitfall:"Usar <code>time.sleep()</code> (bloqueante) dentro de uma <code>async def</code> trava o event loop inteiro, cancelando o ganho da concorrência. Dentro de código assíncrono, sempre use <code>await asyncio.sleep()</code>.",
+      exercicios:[
+        {
+          enunciado:"Compare o tempo de rodar duas tarefas assíncronas de 2s cada em sequência vs com asyncio.gather.",
+          solucao:"import asyncio\nimport time\n\nasync def tarefa(nome):\n    await asyncio.sleep(2)\n    return nome\n\nasync def main():\n    inicio = time.perf_counter()\n    await asyncio.gather(tarefa(\"A\"), tarefa(\"B\"))\n    print(f\"gather: {time.perf_counter() - inicio:.1f}s\")  # ~2.0s, não 4.0s\n\nasyncio.run(main())",
+          explicacao:"Como as duas chamadas a asyncio.sleep(2) não bloqueiam o event loop, elas rodam concorrentemente: o tempo total fica próximo de 2s (o maior atraso individual), não a soma de 2s + 2s."
+        },
+        {
+          enunciado:"Use threading para baixar 'simular' duas requisições de rede em paralelo, imprimindo quando cada uma termina.",
+          solucao:"import threading\nimport time\n\ndef baixar(nome, atraso):\n    time.sleep(atraso)\n    print(f\"{nome} concluído após {atraso}s\")\n\nt1 = threading.Thread(target=baixar, args=(\"Recurso A\", 2))\nt2 = threading.Thread(target=baixar, args=(\"Recurso B\", 1))\n\nt1.start()\nt2.start()\nt1.join()\nt2.join()\nprint(\"Todas as threads terminaram\")",
+          explicacao:"start() dispara cada thread para rodar em paralelo (bom aqui porque time.sleep libera o GIL); join() garante que o programa principal espere as duas terminarem antes de seguir para a última linha."
+        }
+      ]
+    },
+    {
+      icon:"⟡", title:"Métodos Mágicos (Dunder)", tags:"__str__ · __eq__ · __getitem__",
+      sub:"Recursos Avançados",
+      sections:[
+        {h:"Representação de objetos", items:[
+          "<code>__str__</code> define como o objeto aparece em <code>print()</code>/<code>str()</code> (voltado ao usuário); <code>__repr__</code> é a versão de debug (voltada ao programador), usada no console e dentro de listas.",
+          "Se só <code>__repr__</code> for definido, <code>str()</code> cai automaticamente nele — o inverso não acontece."
+        ]},
+        {code:"class Ponto:\n    def __init__(self, x, y):\n        self.x, self.y = x, y\n\n    def __str__(self):\n        return f\"({self.x}, {self.y})\"\n\n    def __repr__(self):\n        return f\"Ponto(x={self.x}, y={self.y})\"\n\np = Ponto(2, 3)\nprint(p)        # (2, 3)\nprint([p])      # [Ponto(x=2, y=3)]"},
+        {h:"Comparação e operadores", items:[
+          "<code>__eq__</code> define o que <code>==</code> significa para a classe; <code>__lt__</code> permite usar <code>sorted()</code> diretamente nos objetos.",
+          "<code>functools.total_ordering</code> gera os outros operadores de comparação (<code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>) a partir de <code>__eq__</code> + <code>__lt__</code>."
+        ]},
+        {h:"Comportamento de coleção", items:[
+          "<code>__len__</code>, <code>__getitem__</code> e <code>__iter__</code> deixam um objeto custom se comportar como lista: aceitar <code>len(obj)</code>, <code>obj[0]</code> e <code>for x in obj</code>."
+        ]}
+      ],
+      pitfall:"Definir <code>__eq__</code> sem definir <code>__hash__</code> torna o objeto <b>não-hashável</b> (não pode virar chave de dict ou item de set) — Python remove o hash padrão automaticamente nesse caso.",
+      exercicios:[
+        {
+          enunciado:"Implemente uma classe Vetor2D com soma via operador + (__add__) e representação legível via __str__.",
+          solucao:"class Vetor2D:\n    def __init__(self, x, y):\n        self.x, self.y = x, y\n\n    def __add__(self, outro):\n        return Vetor2D(self.x + outro.x, self.y + outro.y)\n\n    def __str__(self):\n        return f\"({self.x}, {self.y})\"\n\nv1 = Vetor2D(1, 2)\nv2 = Vetor2D(3, 4)\nprint(v1 + v2)  # (4, 6)",
+          explicacao:"__add__ é chamado automaticamente quando o Python encontra v1 + v2, permitindo usar o operador matemático nativo em vez de um método como v1.somar(v2)."
+        },
+        {
+          enunciado:"Implemente uma classe Fila que suporte len(fila) e indexação fila[0] usando __len__ e __getitem__.",
+          solucao:"class Fila:\n    def __init__(self):\n        self.itens = []\n\n    def adicionar(self, item):\n        self.itens.append(item)\n\n    def __len__(self):\n        return len(self.itens)\n\n    def __getitem__(self, indice):\n        return self.itens[indice]\n\nf = Fila()\nf.adicionar(\"a\")\nf.adicionar(\"b\")\nprint(len(f))    # 2\nprint(f[0])      # a",
+          explicacao:"__getitem__ sozinho já é suficiente para tornar o objeto iterável em um for (Python usa índices crescentes até um IndexError), além de habilitar a sintaxe fila[i] diretamente."
+        }
+      ]
+    },
+    {
+      icon:"⊤", title:"Type Hints Avançado", tags:"Optional · Union · Generic",
+      sub:"Recursos Avançados",
+      sections:[
+        {h:"Tipos compostos", items:[
+          "<code>Optional[X]</code> equivale a <code>Union[X, None]</code> — indica que o valor pode ser do tipo X ou <code>None</code>.",
+          "Desde o Python 3.9, dá pra usar os genéricos nativos: <code>list[int]</code>, <code>dict[str, int]</code>, sem importar de <code>typing</code>."
+        ]},
+        {code:"from typing import Optional\n\ndef buscar_usuario(id: int, usuarios: dict[int, str]) -> Optional[str]:\n    return usuarios.get(id)\n\nresultado = buscar_usuario(5, {1: \"Ana\"})\nprint(resultado)  # None"},
+        {h:"Generics", items:[
+          "<code>TypeVar</code> + classes genéricas permitem escrever uma estrutura de dados (como uma Pilha) que funciona com qualquer tipo, mantendo a checagem de tipo consistente."
+        ]},
+        {h:"Ferramentas", items:[
+          "Type hints não mudam o comportamento em runtime — quem verifica é uma ferramenta externa como <code>mypy</code>, rodada separadamente (<code>mypy arquivo.py</code>).",
+          "<code>Protocol</code> (do <code>typing</code>) permite tipar por comportamento (duck typing), sem exigir herança explícita de uma classe."
+        ]}
+      ],
+      pitfall:"Type hints <b>não são reforçados</b> em tempo de execução — passar um <code>str</code> onde o hint pede <code>int</code> não gera erro automático; só ferramentas de análise estática como o mypy detectam a inconsistência antes de rodar.",
+      exercicios:[
+        {
+          enunciado:"Escreva uma função buscar_produto(id, catalogo) tipada com Optional, que retorna o produto ou None se não existir.",
+          solucao:"from typing import Optional\n\ndef buscar_produto(id: int, catalogo: dict[int, str]) -> Optional[str]:\n    return catalogo.get(id)\n\ncatalogo = {1: \"Teclado\", 2: \"Mouse\"}\nprint(buscar_produto(1, catalogo))  # Teclado\nprint(buscar_produto(9, catalogo))  # None",
+          explicacao:"O retorno Optional[str] documenta explicitamente que a função pode não achar o produto e retornar None, deixando claro para quem chama que precisa tratar esse caso."
+        },
+        {
+          enunciado:"Crie uma classe genérica Pilha[T] usando TypeVar que funcione com qualquer tipo de dado.",
+          solucao:"from typing import TypeVar, Generic\n\nT = TypeVar(\"T\")\n\nclass Pilha(Generic[T]):\n    def __init__(self):\n        self.itens: list[T] = []\n\n    def empilhar(self, item: T) -> None:\n        self.itens.append(item)\n\n    def desempilhar(self) -> T:\n        return self.itens.pop()\n\npilha_int: Pilha[int] = Pilha()\npilha_int.empilhar(10)\nprint(pilha_int.desempilhar())  # 10",
+          explicacao:"Generic[T] permite que a mesma classe Pilha seja usada como Pilha[int], Pilha[str] etc., com o mypy checando que você não misture tipos incompatíveis dentro da mesma instância."
+        }
+      ]
+    },
+    {
+      icon:"⎋", title:"Context Managers Customizados", tags:"with · __enter__ · __exit__",
+      sub:"Recursos Avançados",
+      sections:[
+        {h:"Protocolo with", items:[
+          "<code>__enter__</code> roda ao entrar no bloco <code>with</code> e retorna o recurso a ser usado; <code>__exit__</code> roda ao sair (mesmo se houve exceção) e cuida da limpeza.",
+          "<code>__exit__(self, exc_type, exc_val, exc_tb)</code> recebe detalhes da exceção, se houver uma."
+        ]},
+        {code:"class Cronometro:\n    def __enter__(self):\n        import time\n        self.inicio = time.perf_counter()\n        return self\n\n    def __exit__(self, exc_type, exc_val, exc_tb):\n        import time\n        print(f\"Levou {time.perf_counter() - self.inicio:.4f}s\")\n\nwith Cronometro():\n    soma = sum(range(1_000_000))"},
+        {h:"contextlib.contextmanager", items:[
+          "Alternativa mais curta: uma função geradora decorada com <code>@contextmanager</code>, onde tudo antes do <code>yield</code> é o \"enter\" e tudo depois é o \"exit\"."
+        ]}
+      ],
+      pitfall:"Se <code>__exit__</code> retornar <code>True</code>, a exceção que ocorreu dentro do bloco <code>with</code> é <b>suprimida</b> silenciosamente. Na maioria dos casos você quer deixá-la propagar (retornar <code>None</code> ou <code>False</code>).",
+      exercicios:[
+        {
+          enunciado:"Reescreva o context manager Cronometro usando @contextmanager em vez de uma classe.",
+          solucao:"from contextlib import contextmanager\nimport time\n\n@contextmanager\ndef cronometro():\n    inicio = time.perf_counter()\n    yield\n    print(f\"Levou {time.perf_counter() - inicio:.4f}s\")\n\nwith cronometro():\n    soma = sum(range(1_000_000))",
+          explicacao:"Tudo antes do yield roda como __enter__, e tudo depois roda como __exit__ — muito mais direto que escrever uma classe inteira para um caso de uso simples como este."
+        },
+        {
+          enunciado:"Crie um context manager que troque para um diretório temporariamente e volte ao original ao sair do bloco, mesmo se der erro.",
+          solucao:"from contextlib import contextmanager\nimport os\n\n@contextmanager\ndef diretorio_temporario(caminho):\n    original = os.getcwd()\n    os.chdir(caminho)\n    try:\n        yield\n    finally:\n        os.chdir(original)\n\nwith diretorio_temporario(\"/tmp\"):\n    print(os.getcwd())  # /tmp\nprint(os.getcwd())      # volta ao diretório original",
+          explicacao:"O try/finally ao redor do yield garante que os.chdir(original) rode mesmo se algo dentro do bloco with lançar uma exceção — a limpeza não fica condicionada ao código ter dado certo."
+        }
+      ]
+    },
+    {
+      icon:"☰", title:"Enum & Unpacking Avançado", tags:"Enum · walrus · * **",
+      sub:"Recursos Avançados",
+      sections:[
+        {h:"Enum", items:[
+          "<code>from enum import Enum</code> cria um conjunto fechado de constantes nomeadas — mais seguro que usar strings soltas espalhadas pelo código (evita erros de digitação silenciosos)."
+        ]},
+        {code:"from enum import Enum\n\nclass StatusPedido(Enum):\n    PENDENTE = \"pendente\"\n    PAGO = \"pago\"\n    ENVIADO = \"enviado\"\n\ndef processar(status: StatusPedido):\n    if status == StatusPedido.PAGO:\n        print(\"Liberar envio\")\n\nprocessar(StatusPedido.PAGO)"},
+        {h:"Unpacking avançado", items:[
+          "<code>a, *resto = lista</code> captura o primeiro item em <code>a</code> e o restante em <code>resto</code> como lista.",
+          "<code>{**dict1, **dict2}</code> mescla dois dicionários num novo (chaves repetidas ficam com o valor do último).",
+          "O operador <code>:=</code> (walrus, Python 3.8+) atribui e retorna um valor na mesma expressão — útil para evitar chamar a mesma função duas vezes."
+        ]}
+      ],
+      exercicios:[
+        {
+          enunciado:"Crie um Enum StatusPedido e escreva uma função que retorne uma mensagem diferente para cada status.",
+          solucao:"from enum import Enum\n\nclass StatusPedido(Enum):\n    PENDENTE = \"pendente\"\n    PAGO = \"pago\"\n    ENVIADO = \"enviado\"\n\ndef mensagem(status: StatusPedido) -> str:\n    mapa = {\n        StatusPedido.PENDENTE: \"Aguardando pagamento\",\n        StatusPedido.PAGO: \"Pagamento confirmado\",\n        StatusPedido.ENVIADO: \"Pedido a caminho\",\n    }\n    return mapa[status]\n\nprint(mensagem(StatusPedido.ENVIADO))  # Pedido a caminho",
+          explicacao:"Usar o Enum como chave de dicionário evita comparações com strings soltas (\"enviado\" vs \"Enviado\" vs \"ENVIADO\") que poderiam causar bugs silenciosos de digitação."
+        },
+        {
+          enunciado:"Use o operador walrus (:=) para ler linhas de uma lista simulando um arquivo até encontrar uma linha vazia, sem chamar a função de leitura duas vezes.",
+          solucao:"linhas = iter([\"primeira\", \"segunda\", \"\", \"nunca lida\"])\n\nwhile (linha := next(linhas, \"\")) != \"\":\n    print(linha)\n# imprime: primeira, segunda",
+          explicacao:"Sem o walrus, seria necessário chamar next(linhas) uma vez antes do while e outra vez dentro do loop (duplicando a chamada). Com :=, a atribuição e o teste da condição acontecem na mesma linha."
+        }
+      ]
+    },
+    {
+      icon:"⚙", title:"Multiprocessing", tags:"CPU-bound · Pool · Process",
+      sub:"Recursos Avançados",
+      sections:[
+        {h:"Quando usar", items:[
+          "Para tarefas <b>CPU-bound</b> (cálculo pesado), <code>threading</code> não ajuda por causa do GIL — cada processo do <code>multiprocessing</code> tem seu próprio interpretador Python e sua própria GIL, rodando de verdade em paralelo em núcleos diferentes."
+        ]},
+        {code:"from multiprocessing import Pool\n\ndef quadrado(n):\n    return n * n\n\nif __name__ == \"__main__\":\n    with Pool(processes=4) as pool:\n        resultados = pool.map(quadrado, range(10))\n    print(resultados)"},
+        {h:"Comunicação entre processos", items:[
+          "Processos não compartilham memória por padrão. Use <code>multiprocessing.Queue</code> para trocar mensagens ou <code>multiprocessing.shared_memory</code> para dados compartilhados de fato."
+        ]}
+      ],
+      pitfall:"Argumentos e retornos entre processos precisam ser <b>\"picklable\"</b> (serializáveis) — funções <code>lambda</code> e certos objetos complexos não funcionam diretamente com <code>multiprocessing.Pool</code>.",
+      exercicios:[
+        {
+          enunciado:"Use multiprocessing.Pool para calcular o quadrado de uma lista de 1 a 20 em paralelo.",
+          solucao:"from multiprocessing import Pool\n\ndef quadrado(n):\n    return n * n\n\nif __name__ == \"__main__\":\n    numeros = list(range(1, 21))\n    with Pool(processes=4) as pool:\n        resultados = pool.map(quadrado, numeros)\n    print(resultados)",
+          explicacao:"pool.map distribui os itens de numeros entre os 4 processos do pool, cada um calculando uma parte em paralelo, e depois reúne os resultados na ordem original."
+        },
+        {
+          enunciado:"Compare o tempo de somar números primos até 100.000 de forma sequencial vs dividindo o trabalho em 4 processos.",
+          solucao:"from multiprocessing import Pool\nimport time\n\ndef eh_primo(n):\n    if n < 2:\n        return False\n    return all(n % i != 0 for i in range(2, int(n**0.5) + 1))\n\ndef contar_primos(intervalo):\n    inicio, fim = intervalo\n    return sum(1 for n in range(inicio, fim) if eh_primo(n))\n\nif __name__ == \"__main__\":\n    faixas = [(0, 25000), (25000, 50000), (50000, 75000), (75000, 100000)]\n\n    inicio = time.perf_counter()\n    with Pool(processes=4) as pool:\n        resultados = pool.map(contar_primos, faixas)\n    print(f\"Paralelo: {sum(resultados)} primos em {time.perf_counter() - inicio:.2f}s\")",
+          explicacao:"Dividir o intervalo em 4 faixas e processar cada uma num processo separado aproveita múltiplos núcleos de CPU de verdade — diferente de threading, que não ganharia velocidade nesse tipo de tarefa CPU-bound por causa do GIL."
+        }
+      ]
+    }
+  ]
+};
+
+const ORDER = {
+  fundamentos: "grid-fundamentos",
+  estruturas: "grid-estruturas",
+  poo: "grid-poo",
+  ecossistema: "grid-ecossistema",
+  avancado: "grid-avancado"
+};
+
+const overlay = document.getElementById("overlay");
+const modal = document.getElementById("modal");
+const modalIcon = document.getElementById("modal-icon");
+const modalTitle = document.getElementById("modal-title");
+const modalSub = document.getElementById("modal-sub");
+const modalBody = document.getElementById("modal-body");
+const closeBtn = document.getElementById("close-btn");
+
+let lastFocused = null;
+
+function renderSections(sections){
+  return sections.map(s => {
+    if(s.code){
+      return `<pre><code>${escapeHtml(s.code)}</code></pre>`;
+    }
+    const items = (s.items || []).map(it => `<li>${it}</li>`).join("");
+    return `${s.h ? `<h4>${s.h}</h4>` : ""}<ul>${items}</ul>`;
+  }).join("");
+}
+
+function renderExercicios(exercicios){
+  if(!exercicios || !exercicios.length) return "";
+  const blocos = exercicios.map((ex, i) => `
+    <div class="exercicio">
+      <div class="enunciado"><b>Exercício ${i + 1}.</b> ${ex.enunciado}</div>
+      <details>
+        <summary>Ver solução</summary>
+        <div class="solucao">
+          <pre><code>${escapeHtml(ex.solucao)}</code></pre>
+          <p class="explicacao">${ex.explicacao}</p>
+        </div>
+      </details>
+    </div>
+  `).join("");
+  return `<h4>Exercícios resolvidos</h4>${blocos}`;
+}
+
+function escapeHtml(str){
+  return str.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+}
+
+function openCard(item){
+  lastFocused = document.activeElement;
+  modalIcon.textContent = item.icon;
+  modalTitle.textContent = item.title;
+  modalSub.textContent = item.sub;
+  let html = renderSections(item.sections);
+  if(item.pitfall){
+    html += `<div class="pitfall"><b>Atenção:</b> ${item.pitfall}</div>`;
+  }
+  html += renderExercicios(item.exercicios);
+  modalBody.innerHTML = html;
+  overlay.classList.add("open");
+  overlay.scrollTop = 0;
+  document.body.style.overflow = "hidden";
+  closeBtn.focus();
+}
+
+function closeModal(){
+  overlay.classList.remove("open");
+  document.body.style.overflow = "";
+  if(lastFocused) lastFocused.focus();
+}
+
+closeBtn.addEventListener("click", closeModal);
+overlay.addEventListener("click", (e) => {
+  if(e.target === overlay) closeModal();
+});
+document.addEventListener("keydown", (e) => {
+  if(e.key === "Escape"){
+    if(overlay.classList.contains("open")){
+      closeModal();
+    } else if(document.activeElement === searchInput && searchInput.value){
+      searchInput.value = "";
+      applyFilter();
+    }
+  }
+});
+
+function buildCard(item){
+  const card = document.createElement("button");
+  card.className = "card";
+  card.type = "button";
+  card.setAttribute("aria-haspopup", "dialog");
+  card.dataset.search = (item.title + " " + item.tags).toLowerCase();
+  card.innerHTML = `
+    <span class="hint">abrir →</span>
+    <span class="icon">${item.icon}</span>
+    <h3>${item.title}</h3>
+    <span class="tags">${item.tags}</span>
+  `;
+  card.addEventListener("click", () => openCard(item));
+  return card;
+}
+
+const totalCards = Object.values(DATA).reduce((sum, arr) => sum + arr.length, 0);
+
+for(const [key, gridId] of Object.entries(ORDER)){
+  const grid = document.getElementById(gridId);
+  DATA[key].forEach(item => grid.appendChild(buildCard(item)));
+}
+
+const searchInput = document.getElementById("search-input");
+const searchCount = document.getElementById("search-count");
+const noResults = document.getElementById("no-results");
+const allCards = Array.from(document.querySelectorAll(".card"));
+const allLabels = Array.from(document.querySelectorAll(".section-label"));
+const allGrids = Array.from(document.querySelectorAll(".grid"));
+
+function applyFilter(){
+  const q = searchInput.value.trim().toLowerCase();
+  let visibleTotal = 0;
+
+  allGrids.forEach(grid => {
+    let visibleInGrid = 0;
+    Array.from(grid.children).forEach(card => {
+      const match = !q || card.dataset.search.includes(q);
+      card.classList.toggle("hidden", !match);
+      if(match) visibleInGrid++;
+    });
+    grid.classList.toggle("hidden", visibleInGrid === 0);
+    visibleTotal += visibleInGrid;
+  });
+
+  allLabels.forEach(label => {
+    const section = label.dataset.section;
+    const grid = document.getElementById(`grid-${section}`);
+    label.classList.toggle("hidden", grid.classList.contains("hidden"));
+  });
+
+  noResults.classList.toggle("show", visibleTotal === 0);
+  searchCount.textContent = q ? `${visibleTotal} de ${totalCards} tópicos` : "";
+}
+
+searchInput.addEventListener("input", applyFilter);
+</script>
+</body>
+</html>
