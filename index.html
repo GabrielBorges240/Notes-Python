@@ -18,6 +18,20 @@
     --accent-dim: #b98644;
     --mono: #7fb59e;
     --divider: #333333;
+    /* Mayukai Mirage Gruvbox Darktooth (Base16 Darktooth) */
+    --dt-bg: #1D2021;
+    --dt-bg-alt: #32302F;
+    --dt-border: #504945;
+    --dt-comment: #665C54;
+    --dt-fg: #D5C4A1;
+    --dt-red: #FB543F;
+    --dt-orange: #FE8625;
+    --dt-yellow: #FAC03B;
+    --dt-green: #95C085;
+    --dt-aqua: #8BA59B;
+    --dt-blue: #3FA6C4;
+    --dt-purple: #C56AA0;
+    --dt-brown: #A87322;
     --focus: #e0a458;
     --radius: 10px;
   }
@@ -198,18 +212,26 @@
   .modal-body p{ font-size: .88rem; color: var(--text); margin: 0 0 8px; }
 
   pre{
-    background: #1a1a1a;
-    border: 1px solid var(--card-border);
+    background: var(--dt-bg);
+    border: 1px solid var(--dt-border);
     border-radius: 8px;
     padding: 12px 14px;
     overflow-x: auto;
     font-size: .82rem;
-    color: var(--mono);
+    color: var(--dt-fg);
     margin: 6px 0 4px;
   }
+  pre code{ color: var(--dt-fg); background: none; padding: 0; }
+  .tok-kw{ color: var(--dt-purple); font-weight: 700; }
+  .tok-str{ color: var(--dt-green); }
+  .tok-num{ color: var(--dt-orange); }
+  .tok-com{ color: var(--dt-comment); font-style: italic; }
+  .tok-fn{ color: var(--dt-blue); }
+  .tok-bi{ color: var(--dt-yellow); }
   code{ color: var(--mono); }
   .modal-body p code, .modal-body li code{
-    background: #1a1a1a;
+    background: var(--dt-bg);
+    color: var(--dt-fg);
     padding: 1px 5px;
     border-radius: 4px;
     font-size: .84rem;
@@ -379,20 +401,10 @@ const DATA = {
       icon:"⌗", title:"Sintaxe & Variáveis", tags:"tipos · indentação · f-strings",
       sub:"Fundamentos",
       sections:[
-        {h:"Tipagem", items:[
-          "Python é <b>dinamicamente tipado</b>: o tipo é da variável em tempo de execução, não declarado.",
-          "Tipos nativos: <code>int</code>, <code>float</code>, <code>str</code>, <code>bool</code>, <code>NoneType</code>.",
-          "Use <code>type(x)</code> para inspecionar e <code>isinstance(x, int)</code> para checar."
-        ]},
-        {h:"Indentação", items:[
-          "Blocos são definidos por indentação (4 espaços é a convenção PEP8), não por chaves.",
-          "Misturar tabs e espaços quebra o parser — configure o editor para converter tab em espaços."
-        ]},
+        {h:"Tipagem", items:["Python é <b>dinamicamente tipado</b>: o tipo é da variável em tempo de execução, não declarado.", "Tipos nativos: <code>int</code>, <code>float</code>, <code>str</code>, <code>bool</code>, <code>NoneType</code>.", "Use <code>type(x)</code> para inspecionar e <code>isinstance(x, int)</code> para checar."]},
+        {h:"Indentação", items:["Blocos são definidos por indentação (4 espaços é a convenção PEP8), não por chaves.", "Misturar tabs e espaços quebra o parser — configure o editor para converter tab em espaços."]},
         {code:"nome = \"Gabriel\"\nidade = 21\naltura = 1.78\n\nprint(f\"{nome} tem {idade} anos e {altura:.2f}m\")"},
-        {h:"f-strings", items:[
-          "Preferíveis a <code>%</code> ou <code>.format()</code>: mais legíveis e mais rápidas.",
-          "Suportam expressões dentro das chaves: <code>f\"{a + b}\"</code>."
-        ]}
+        {h:"f-strings", items:["Preferíveis a <code>%</code> ou <code>.format()</code>: mais legíveis e mais rápidas.", "Suportam expressões dentro das chaves: <code>f\"{a + b}\"</code>."]}
       ],
       pitfall:"Cuidado: <code>0.1 + 0.2 != 0.3</code> por causa de ponto flutuante. Para comparar floats, use <code>math.isclose()</code>.",
       exercicios:[
@@ -405,6 +417,55 @@ const DATA = {
           enunciado:"Dado um preço em reais (float), imprima o valor formatado com 2 casas decimais e o símbolo R$.",
           solucao:"preco = 1234.5\nprint(f\"R$ {preco:.2f}\")",
           explicacao:"O especificador :.2f dentro da f-string arredonda e formata o float com exatamente duas casas decimais — não precisa de round() manual."
+        },
+        {
+          enunciado:"Declare três variáveis (nome, cidade, idade) e imprima uma frase completa usando f-string com todas elas em uma única linha.",
+          solucao:"nome = \"Marina\"\ncidade = \"Porto Velho\"\nidade = 28\n\nprint(f\"{nome}, {idade} anos, mora em {cidade}.\")",
+          explicacao:"A f-string permite inserir múltiplas variáveis diretamente no texto sem precisar concatenar com + ou usar .format(), tornando a leitura do código mais direta."
+        },
+        {
+          enunciado:"Escreva um trecho de código que soma dois números lidos do usuário com input(), tomando cuidado com a conversão de tipos.",
+          solucao:"a = int(input(\"Primeiro número: \"))\nb = int(input(\"Segundo número: \"))\n\nsoma = a + b\nprint(f\"A soma é {soma}\")",
+          explicacao:"input() sempre devolve uma string, então somar sem converter concatenaria os textos (ex: \"2\" + \"3\" = \"23\") em vez de somar os números. int() converte cada entrada antes da soma."
+        }
+      ]
+    },
+    {
+      icon:"◈", title:"Tipos Primitivos", tags:"int · float · str · bool · NoneType",
+      sub:"Fundamentos",
+      sections:[
+        {h:"int — números inteiros", items:["Representa números inteiros, sem limite de tamanho — Python ajusta a precisão automaticamente (não existe overflow como em outras linguagens).", "Operadores: <code>+ - * / // % **</code>. A divisão <code>/</code> sempre retorna <code>float</code>; use <code>//</code> para divisão inteira."]},
+        {code:"a = 17\nb = 5\n\nprint(a / b)    # 3.4  (float)\nprint(a // b)   # 3    (divisão inteira)\nprint(a % b)    # 2    (resto)\nprint(a ** 2)   # 289  (potência)"},
+        {h:"float — números de ponto flutuante", items:["Representa números com casas decimais, seguindo o padrão IEEE 754 — por isso alguns valores não têm representação exata (<code>0.1 + 0.2 != 0.3</code>).", "Converta com <code>float(x)</code>; para comparar com segurança, use <code>math.isclose(a, b)</code> em vez de <code>==</code>."]},
+        {code:"preco = float(\"19.9\")\ndesconto = preco * 0.1\n\nprint(preco - desconto)   # 17.91\nprint(round(preco, 0))    # 20.0"},
+        {h:"str — texto", items:["Sequência imutável de caracteres — qualquer método de \"modificação\" (como <code>.upper()</code>) retorna uma string nova, sem alterar a original.", "Suporta indexação (<code>s[0]</code>), fatiamento (<code>s[1:4]</code>) e métodos como <code>.strip()</code>, <code>.split()</code>, <code>.replace()</code>, <code>.join()</code>."]},
+        {code:"frase = \"  Python é ótimo  \"\n\nprint(frase.strip())          # \"Python é ótimo\"\nprint(frase.strip().upper())  # \"PYTHON É ÓTIMO\"\nprint(frase.strip().split())  # ['Python', 'é', 'ótimo']"},
+        {h:"bool — verdadeiro ou falso", items:["<code>bool</code> é, na prática, uma subclasse de <code>int</code>: <code>True</code> vale <code>1</code> e <code>False</code> vale <code>0</code> — por isso <code>True + True == 2</code>.", "Valores \"falsy\" (avaliados como <code>False</code> num <code>if</code>): <code>0</code>, <code>0.0</code>, <code>\"\"</code>, <code>[]</code>, <code>{}</code>, <code>None</code>. Todo o resto é \"truthy\"."]},
+        {code:"lista = []\nnome = \"\"\n\nif not lista and not nome:\n    print(\"lista e nome estão vazios\")\n\nprint(True + True)             # 2\nprint(isinstance(True, int))   # True"},
+        {h:"NoneType — ausência de valor", items:["<code>None</code> é o único valor do tipo <code>NoneType</code> — representa \"nenhum valor\", diferente de <code>0</code>, <code>\"\"</code> ou <code>False</code>.", "Funções sem <code>return</code> explícito retornam <code>None</code> automaticamente. Para comparar, use <code>is None</code> em vez de <code>== None</code> (mais rápido e semanticamente correto, já que <code>None</code> é um singleton)."]},
+        {code:"def saudacao(nome):\n    print(f\"Olá, {nome}\")\n\nresultado = saudacao(\"Ana\")\nprint(resultado)           # None\nprint(resultado is None)   # True"}
+      ],
+      pitfall:"<code>bool</code> herda de <code>int</code>, então <code>True == 1</code> e <code>False == 0</code> retornam <code>True</code> — isso pode causar bugs sutis em comparações e em chaves de dicionário (<code>{1: \"a\", True: \"b\"}</code> tem só uma chave, porque <code>1 == True</code>).",
+      exercicios:[
+        {
+          enunciado:"Escreva uma função que recebe um número inteiro e retorna 'par' ou 'ímpar', usando o operador de módulo.",
+          solucao:"def par_ou_impar(n: int) -> str:\n    return \"par\" if n % 2 == 0 else \"ímpar\"\n\nprint(par_ou_impar(7))    # ímpar\nprint(par_ou_impar(10))   # par",
+          explicacao:"n % 2 retorna o resto da divisão por 2: 0 para números pares e 1 para ímpares. O operador ternário (if/else em uma linha) evita escrever um bloco if/else completo."
+        },
+        {
+          enunciado:"Dado um valor em float, arredonde para 2 casas decimais e diga se ele é aproximadamente igual, maior ou menor que 100.00, sem comparar floats diretamente com ==.",
+          solucao:"import math\n\nvalor = 99.999999\nvalor = round(valor, 2)\n\nif math.isclose(valor, 100.00, abs_tol=0.01):\n    print(\"aproximadamente igual a 100\")\nelif valor > 100.00:\n    print(\"maior que 100\")\nelse:\n    print(\"menor que 100\")",
+          explicacao:"math.isclose() evita problemas de precisão de ponto flutuante que fariam uma comparação == falhar mesmo quando os números são praticamente iguais."
+        },
+        {
+          enunciado:"Escreva uma função que recebe uma string e retorna True se ela é um palíndromo (ignorando espaços e maiúsculas/minúsculas), False caso contrário.",
+          solucao:"def eh_palindromo(texto: str) -> bool:\n    limpo = texto.lower().replace(\" \", \"\")\n    return limpo == limpo[::-1]\n\nprint(eh_palindromo(\"Ana\"))\n# True\nprint(eh_palindromo(\"Socorram me subi no onibus em marrocos\"))\n# True",
+          explicacao:"texto[::-1] usa fatiamento com passo -1 para inverter a string. Comparar a versão limpa (minúscula, sem espaços) com sua versão invertida detecta o palíndromo."
+        },
+        {
+          enunciado:"Implemente uma função buscar(dicionario, chave) que retorna o valor associado à chave ou None se a chave não existir, e trate esse None de forma segura ao usar o resultado.",
+          solucao:"def buscar(dicionario: dict, chave):\n    return dicionario.get(chave)\n\nestoque = {\"maçã\": 10, \"banana\": 5}\nresultado = buscar(estoque, \"laranja\")\n\nif resultado is None:\n    print(\"Produto não encontrado\")\nelse:\n    print(f\"Quantidade: {resultado}\")",
+          explicacao:"dict.get() retorna None por padrão quando a chave não existe, em vez de lançar KeyError como dicionario[chave] faria. Checar com is None trata esse caso sem quebrar o programa."
         }
       ]
     },
@@ -412,17 +473,9 @@ const DATA = {
       icon:"⌥", title:"Estruturas de Controle", tags:"if/elif/else · for · while",
       sub:"Fundamentos",
       sections:[
-        {h:"Condicionais", items:[
-          "Python não tem <code>switch</code> nativo (mas 3.10+ tem <code>match/case</code>).",
-          "Operadores lógicos são palavras: <code>and</code>, <code>or</code>, <code>not</code> — não <code>&&</code>/<code>||</code>."
-        ]},
+        {h:"Condicionais", items:["Python não tem <code>switch</code> nativo (mas 3.10+ tem <code>match/case</code>).", "Operadores lógicos são palavras: <code>and</code>, <code>or</code>, <code>not</code> — não <code>&&</code>/<code>||</code>."]},
         {code:"idade = 20\nif idade >= 18 and idade < 65:\n    categoria = \"adulto\"\nelif idade >= 65:\n    categoria = \"idoso\"\nelse:\n    categoria = \"menor\""},
-        {h:"Laços", items:[
-          "<code>for</code> itera sobre qualquer iterável (não é laço de contador clássico).",
-          "<code>range(inicio, fim, passo)</code> gera sequência sem alocar lista inteira.",
-          "<code>while</code> + <code>break</code>/<code>continue</code> para controle fino.",
-          "Todo <code>for</code>/<code>while</code> aceita <code>else</code>: executa se não houve <code>break</code>."
-        ]},
+        {h:"Laços", items:["<code>for</code> itera sobre qualquer iterável (não é laço de contador clássico).", "<code>range(inicio, fim, passo)</code> gera sequência sem alocar lista inteira.", "<code>while</code> + <code>break</code>/<code>continue</code> para controle fino.", "Todo <code>for</code>/<code>while</code> aceita <code>else</code>: executa se não houve <code>break</code>."]},
         {code:"for i in range(5):\n    if i == 3:\n        break\n    print(i)\nelse:\n    print(\"loop completo\")  # não roda, houve break"}
       ],
       pitfall:"Evite comparar booleanos com valores fixos tipo <code>if resultado == True</code>. A expressão lógica já <b>é</b> o valor — retorne/compare a condição diretamente em vez de codificar strings/valores prontos.",
@@ -436,6 +489,16 @@ const DATA = {
           enunciado:"Some todos os números de 1 a 100 que sejam múltiplos de 3 ou 5, usando um único for.",
           solucao:"total = 0\nfor n in range(1, 101):\n    if n % 3 == 0 or n % 5 == 0:\n        total += n\n\nprint(total)  # 2418",
           explicacao:"O operador or garante que o número entre na soma se satisfizer qualquer uma das duas condições, sem precisar checar cada caso separadamente."
+        },
+        {
+          enunciado:"Escreva um programa que percorre os números de 1 a 30 e imprime 'Fizz' se for múltiplo de 3, 'Buzz' se for múltiplo de 5, 'FizzBuzz' se for múltiplo de ambos, ou o próprio número caso contrário.",
+          solucao:"for n in range(1, 31):\n    if n % 15 == 0:\n        print(\"FizzBuzz\")\n    elif n % 3 == 0:\n        print(\"Fizz\")\n    elif n % 5 == 0:\n        print(\"Buzz\")\n    else:\n        print(n)",
+          explicacao:"A checagem de n % 15 == 0 precisa vir primeiro porque um número múltiplo de 3 e de 5 ao mesmo tempo também seria capturado pelas condições individuais — a ordem do elif evita esse conflito."
+        },
+        {
+          enunciado:"Use um laço while para simular um caixa eletrônico que pede uma senha até o usuário acertar (senha correta: '1234'), com no máximo 3 tentativas.",
+          solucao:"senha_correta = \"1234\"\ntentativas = 0\n\nwhile tentativas < 3:\n    senha = input(\"Digite a senha: \")\n    if senha == senha_correta:\n        print(\"Acesso liberado\")\n        break\n    tentativas += 1\n    print(\"Senha incorreta\")\nelse:\n    print(\"Conta bloqueada\")",
+          explicacao:"O bloco else de um while é executado somente se o laço terminar sem break — ou seja, só entra em 'Conta bloqueada' se as 3 tentativas acabarem sem acerto."
         }
       ]
     },
@@ -443,19 +506,10 @@ const DATA = {
       icon:"ƒ", title:"Funções", tags:"*args · **kwargs · lambda",
       sub:"Fundamentos",
       sections:[
-        {h:"Definição", items:[
-          "Parâmetros podem ter valores padrão; use <code>None</code> como sentinela para mutáveis.",
-          "<code>*args</code> captura posicionais extras como tupla; <code>**kwargs</code> captura nomeados extras como dict."
-        ]},
+        {h:"Definição", items:["Parâmetros podem ter valores padrão; use <code>None</code> como sentinela para mutáveis.", "<code>*args</code> captura posicionais extras como tupla; <code>**kwargs</code> captura nomeados extras como dict."]},
         {code:"def somar(*numeros, arredondar=False, **opcoes):\n    total = sum(numeros)\n    return round(total) if arredondar else total\n\nsomar(1, 2, 3, arredondar=True)"},
-        {h:"Escopo & closures", items:[
-          "Variáveis criadas dentro de uma função são locais por padrão.",
-          "<code>nonlocal</code> permite modificar variável de escopo externo (não global).",
-          "Funções são objetos de primeira classe: podem ser passadas, retornadas, guardadas em listas."
-        ]},
-        {h:"Type hints", items:[
-          "<code>def f(x: int) -> str:</code> não é reforçado em runtime, mas ajuda IDEs e ferramentas como <code>mypy</code>."
-        ]}
+        {h:"Escopo & closures", items:["Variáveis criadas dentro de uma função são locais por padrão.", "<code>nonlocal</code> permite modificar variável de escopo externo (não global).", "Funções são objetos de primeira classe: podem ser passadas, retornadas, guardadas em listas."]},
+        {h:"Type hints", items:["<code>def f(x: int) -> str:</code> não é reforçado em runtime, mas ajuda IDEs e ferramentas como <code>mypy</code>."]}
       ],
       pitfall:"Nunca use lista/dict como valor <b>padrão</b> mutável — <code>def f(x=[]):</code> compartilha a mesma lista entre chamadas. Use <code>x=None</code> e crie a lista dentro da função.",
       exercicios:[
@@ -468,6 +522,16 @@ const DATA = {
           enunciado:"Crie uma função contador() que retorne uma outra função (closure) que incrementa e retorna um contador a cada chamada.",
           solucao:"def contador():\n    n = 0\n    def incrementar():\n        nonlocal n\n        n += 1\n        return n\n    return incrementar\n\nprox = contador()\nprint(prox())  # 1\nprint(prox())  # 2\nprint(prox())  # 3",
           explicacao:"incrementar 'lembra' da variável n do escopo de contador() mesmo depois que contador() já terminou de executar — isso é uma closure. nonlocal é necessário para modificar (não só ler) a variável do escopo externo."
+        },
+        {
+          enunciado:"Escreva uma função soma_tudo(*args) que recebe uma quantidade variável de números e retorna a soma de todos eles.",
+          solucao:"def soma_tudo(*args):\n    return sum(args)\n\nprint(soma_tudo(1, 2, 3))       # 6\nprint(soma_tudo(10, 20, 30, 40)) # 100",
+          explicacao:"*args coleta qualquer quantidade de argumentos posicionais em uma tupla, permitindo que a função aceite de 0 a N números sem precisar definir cada parâmetro individualmente."
+        },
+        {
+          enunciado:"Escreva uma função que recebe um número e uma função (como parâmetro) e aplica essa função ao número, usando conceito de função de alta ordem.",
+          solucao:"def aplicar(numero, funcao):\n    return funcao(numero)\n\ndobro = lambda x: x * 2\nquadrado = lambda x: x ** 2\n\nprint(aplicar(5, dobro))     # 10\nprint(aplicar(5, quadrado))  # 25",
+          explicacao:"Em Python, funções são \"cidadãs de primeira classe\": podem ser passadas como argumento para outras funções, permitindo comportamento configurável sem duplicar código."
         }
       ]
     },
@@ -475,17 +539,10 @@ const DATA = {
       icon:"⇄", title:"Cálculo & Álgebra Linear", tags:"math · numpy · gradiente",
       sub:"Fundamentos",
       sections:[
-        {h:"Módulo math", items:[
-          "<code>math.sqrt</code>, <code>math.log</code>, <code>math.exp</code>, <code>math.isclose()</code> para comparação segura de floats."
-        ]},
-        {h:"NumPy para álgebra linear", items:[
-          "Vetores e matrizes viram <code>ndarray</code>; operações são vetorizadas (muito mais rápidas que loops puros).",
-          "Multiplicação de matriz usa <code>@</code> ou <code>np.dot()</code>, nunca <code>*</code> (que é elemento a elemento)."
-        ]},
+        {h:"Módulo math", items:["<code>math.sqrt</code>, <code>math.log</code>, <code>math.exp</code>, <code>math.isclose()</code> para comparação segura de floats."]},
+        {h:"NumPy para álgebra linear", items:["Vetores e matrizes viram <code>ndarray</code>; operações são vetorizadas (muito mais rápidas que loops puros).", "Multiplicação de matriz usa <code>@</code> ou <code>np.dot()</code>, nunca <code>*</code> (que é elemento a elemento)."]},
         {code:"import numpy as np\n\nA = np.array([[1, 2], [3, 4]])\nb = np.array([5, 6])\n\nx = A @ b          # produto matricial\ngrad = 2 * A.T @ (A @ x - b)  # passo de gradiente"},
-        {h:"Ligação com ML", items:[
-          "Gradiente descendente, no fundo, é apenas derivadas + atualização iterativa de parâmetros — vetorize sempre que possível em vez de laços <code>for</code>."
-        ]}
+        {h:"Ligação com ML", items:["Gradiente descendente, no fundo, é apenas derivadas + atualização iterativa de parâmetros — vetorize sempre que possível em vez de laços <code>for</code>."]}
       ],
       exercicios:[
         {
@@ -497,6 +554,16 @@ const DATA = {
           enunciado:"Implemente um passo de gradiente descendente para minimizar f(x) = x², partindo de x=10, taxa de aprendizado 0.1, por 5 iterações.",
           solucao:"x = 10.0\ntaxa = 0.1\n\nfor i in range(5):\n    gradiente = 2 * x       # derivada de x^2\n    x = x - taxa * gradiente\n    print(f\"iteração {i+1}: x = {x:.4f}\")",
           explicacao:"A derivada de x² é 2x. A cada passo, x se move na direção oposta ao gradiente (por isso o sinal de menos), aproximando-se do mínimo em x=0."
+        },
+        {
+          enunciado:"Usando a biblioteca math, calcule a hipotenusa de um triângulo retângulo com catetos 3 e 4.",
+          solucao:"import math\n\ncateto_a = 3\ncateto_b = 4\n\nhipotenusa = math.sqrt(cateto_a ** 2 + cateto_b ** 2)\nprint(hipotenusa)  # 5.0",
+          explicacao:"math.sqrt() calcula a raiz quadrada. Aplicar o Teorema de Pitágoras (a² + b² = c²) manualmente com ** e depois tirar a raiz reproduz o cálculo da hipotenusa."
+        },
+        {
+          enunciado:"Usando numpy, crie dois vetores e calcule o produto escalar (dot product) entre eles.",
+          solucao:"import numpy as np\n\nv1 = np.array([1, 2, 3])\nv2 = np.array([4, 5, 6])\n\nproduto_escalar = np.dot(v1, v2)\nprint(produto_escalar)  # 32",
+          explicacao:"np.dot() multiplica os elementos correspondentes dos dois vetores e soma os resultados (1*4 + 2*5 + 3*6 = 32), operação fundamental em álgebra linear e machine learning."
         }
       ]
     }
@@ -506,19 +573,10 @@ const DATA = {
       icon:"▤", title:"Listas, Tuplas & Sets", tags:"slicing · compreensão · mutabilidade",
       sub:"Estruturas de Dados",
       sections:[
-        {h:"Listas (mutáveis)", items:[
-          "Slicing: <code>lista[inicio:fim:passo]</code>, aceita índices negativos.",
-          "List comprehension é mais idiomática que <code>for</code> + <code>append</code> para transformações simples."
-        ]},
+        {h:"Listas (mutáveis)", items:["Slicing: <code>lista[inicio:fim:passo]</code>, aceita índices negativos.", "List comprehension é mais idiomática que <code>for</code> + <code>append</code> para transformações simples."]},
         {code:"pares = [n for n in range(20) if n % 2 == 0]\nmatriz = [[i*j for j in range(3)] for i in range(3)]"},
-        {h:"Tuplas (imutáveis)", items:[
-          "Usadas para dados fixos e como chave de dicionário (listas não podem ser chave).",
-          "Desempacotamento: <code>a, b = b, a</code> troca valores sem variável temporária."
-        ]},
-        {h:"Sets", items:[
-          "Coleção não ordenada de elementos únicos — ótimo para checar pertencimento em O(1) e remover duplicatas.",
-          "Operações de conjunto: <code>a | b</code> (união), <code>a & b</code> (interseção), <code>a - b</code> (diferença)."
-        ]}
+        {h:"Tuplas (imutáveis)", items:["Usadas para dados fixos e como chave de dicionário (listas não podem ser chave).", "Desempacotamento: <code>a, b = b, a</code> troca valores sem variável temporária."]},
+        {h:"Sets", items:["Coleção não ordenada de elementos únicos — ótimo para checar pertencimento em O(1) e remover duplicatas.", "Operações de conjunto: <code>a | b</code> (união), <code>a & b</code> (interseção), <code>a - b</code> (diferença)."]}
       ],
       pitfall:"<code>lista2 = lista1</code> copia a <b>referência</b>, não os dados. Para copiar de verdade use <code>lista1.copy()</code> ou <code>list(lista1)</code> (e <code>copy.deepcopy()</code> para listas aninhadas).",
       exercicios:[
@@ -531,6 +589,16 @@ const DATA = {
           enunciado:"Dada uma lista de tuplas [(\"Ana\", 8.5), (\"Bruno\", 6.0), (\"Carla\", 9.2)], retorne só os nomes de quem tirou nota >= 7.",
           solucao:"alunos = [(\"Ana\", 8.5), (\"Bruno\", 6.0), (\"Carla\", 9.2)]\naprovados = [nome for nome, nota in alunos if nota >= 7]\nprint(aprovados)  # ['Ana', 'Carla']",
           explicacao:"O for dentro da list comprehension já desempacota cada tupla em nome e nota, então dá pra filtrar direto pela nota sem precisar de índices como tupla[1]."
+        },
+        {
+          enunciado:"Dada uma lista de números com repetições, remova os duplicados mantendo a ordem original de aparição.",
+          solucao:"numeros = [3, 1, 4, 1, 5, 9, 3, 2, 6, 5]\n\nvistos = set()\nresultado = []\nfor n in numeros:\n    if n not in vistos:\n        vistos.add(n)\n        resultado.append(n)\n\nprint(resultado)  # [3, 1, 4, 5, 9, 2, 6]",
+          explicacao:"Usar apenas set(numeros) removeria duplicados mas perderia a ordem original, já que sets não são ordenados. Combinar um set de controle com uma lista de resultado preserva a ordem."
+        },
+        {
+          enunciado:"Dadas duas listas de mesmo tamanho, combine-as em uma lista de tuplas (nome, nota) e depois ordene pela nota, do maior para o menor.",
+          solucao:"nomes = [\"Ana\", \"Bruno\", \"Carla\"]\nnotas = [8.5, 9.2, 7.8]\n\nalunos = list(zip(nomes, notas))\nalunos_ordenados = sorted(alunos, key=lambda x: x[1], reverse=True)\n\nprint(alunos_ordenados)  # [('Bruno', 9.2), ('Ana', 8.5), ('Carla', 7.8)]",
+          explicacao:"zip() combina as duas listas elemento a elemento em tuplas. sorted() com key=lambda x: x[1] ordena pelas notas (segundo item da tupla), e reverse=True inverte para decrescente."
         }
       ]
     },
@@ -538,16 +606,9 @@ const DATA = {
       icon:"⎁", title:"Dicionários", tags:"hashmap · get · defaultdict",
       sub:"Estruturas de Dados",
       sections:[
-        {h:"Básico", items:[
-          "Implementado como hash table: acesso, inserção e remoção em O(1) médio.",
-          "Desde o Python 3.7, dicionários preservam a ordem de inserção."
-        ]},
+        {h:"Básico", items:["Implementado como hash table: acesso, inserção e remoção em O(1) médio.", "Desde o Python 3.7, dicionários preservam a ordem de inserção."]},
         {code:"contagem = {}\nfor palavra in texto.split():\n    contagem[palavra] = contagem.get(palavra, 0) + 1\n\n# equivalente mais limpo:\nfrom collections import defaultdict\ncontagem = defaultdict(int)\nfor palavra in texto.split():\n    contagem[palavra] += 1"},
-        {h:"Métodos úteis", items:[
-          "<code>.get(chave, padrao)</code> evita <code>KeyError</code>.",
-          "<code>.items()</code>, <code>.keys()</code>, <code>.values()</code> para iterar.",
-          "Dict comprehension: <code>{k: v*2 for k, v in d.items()}</code>."
-        ]}
+        {h:"Métodos úteis", items:["<code>.get(chave, padrao)</code> evita <code>KeyError</code>.", "<code>.items()</code>, <code>.keys()</code>, <code>.values()</code> para iterar.", "Dict comprehension: <code>{k: v*2 for k, v in d.items()}</code>."]}
       ],
       pitfall:"<code>dicionario[chave]</code> lança <code>KeyError</code> se a chave não existir. Prefira <code>.get()</code> quando o valor pode não estar presente.",
       exercicios:[
@@ -560,6 +621,16 @@ const DATA = {
           enunciado:"Inverta um dicionário {\"a\": 1, \"b\": 2, \"c\": 3} para que os valores virem chaves e vice-versa.",
           solucao:"original = {\"a\": 1, \"b\": 2, \"c\": 3}\ninvertido = {valor: chave for chave, valor in original.items()}\nprint(invertido)  # {1: 'a', 2: 'b', 3: 'c'}",
           explicacao:"Dict comprehension percorre .items() e monta um novo dicionário trocando a posição de chave e valor. Só funciona bem se os valores originais forem únicos e hashable."
+        },
+        {
+          enunciado:"Dado um texto, conte quantas vezes cada palavra aparece usando um dicionário.",
+          solucao:"texto = \"python é fácil python é poderoso\"\npalavras = texto.split()\n\ncontagem = {}\nfor palavra in palavras:\n    contagem[palavra] = contagem.get(palavra, 0) + 1\n\nprint(contagem)  # {'python': 2, 'é': 2, 'fácil': 1, 'poderoso': 1}",
+          explicacao:"dict.get(chave, 0) retorna 0 se a palavra ainda não estiver no dicionário, evitando um KeyError e permitindo incrementar o contador em uma única linha."
+        },
+        {
+          enunciado:"Combine dois dicionários de estoque, somando as quantidades quando o produto existir nos dois.",
+          solucao:"loja_a = {\"maçã\": 10, \"banana\": 5}\nloja_b = {\"banana\": 8, \"uva\": 12}\n\nestoque_total = dict(loja_a)\nfor produto, qtd in loja_b.items():\n    estoque_total[produto] = estoque_total.get(produto, 0) + qtd\n\nprint(estoque_total)  # {'maçã': 10, 'banana': 13, 'uva': 12}",
+          explicacao:"dict(loja_a) cria uma cópia para não alterar o dicionário original. O laço soma as quantidades da segunda loja, usando get() para tratar produtos que ainda não existem no total."
         }
       ]
     },
@@ -567,18 +638,10 @@ const DATA = {
       icon:"⇅", title:"Ordenação & Busca", tags:"Big-O · sort · bisect",
       sub:"Estruturas de Dados",
       sections:[
-        {h:"Ordenação nativa", items:[
-          "<code>sorted(lista, key=..., reverse=...)</code> usa Timsort — O(n log n), estável.",
-          "<code>.sort()</code> ordena a lista in-place e retorna <code>None</code> (erro comum: <code>x = lista.sort()</code>)."
-        ]},
+        {h:"Ordenação nativa", items:["<code>sorted(lista, key=..., reverse=...)</code> usa Timsort — O(n log n), estável.", "<code>.sort()</code> ordena a lista in-place e retorna <code>None</code> (erro comum: <code>x = lista.sort()</code>)."]},
         {code:"pessoas.sort(key=lambda p: (p.idade, p.nome))\nmais_novo = min(pessoas, key=lambda p: p.idade)"},
-        {h:"Busca binária", items:[
-          "Para listas já ordenadas, o módulo <code>bisect</code> encontra posição em O(log n) sem reimplementar o algoritmo."
-        ]},
-        {h:"Big-O que aparece direto", items:[
-          "Acesso por índice em lista: O(1). Busca por valor: O(n).",
-          "<code>in</code> em lista é O(n); <code>in</code> em set/dict é O(1) médio — trocar estrutura resolve muito gargalo."
-        ]}
+        {h:"Busca binária", items:["Para listas já ordenadas, o módulo <code>bisect</code> encontra posição em O(log n) sem reimplementar o algoritmo."]},
+        {h:"Big-O que aparece direto", items:["Acesso por índice em lista: O(1). Busca por valor: O(n).", "<code>in</code> em lista é O(n); <code>in</code> em set/dict é O(1) médio — trocar estrutura resolve muito gargalo."]}
       ],
       exercicios:[
         {
@@ -590,6 +653,16 @@ const DATA = {
           enunciado:"Implemente busca binária manualmente numa lista ordenada para encontrar o índice de um valor (ou -1 se não existir).",
           solucao:"def busca_binaria(lista, alvo):\n    esquerda, direita = 0, len(lista) - 1\n    while esquerda <= direita:\n        meio = (esquerda + direita) // 2\n        if lista[meio] == alvo:\n            return meio\n        elif lista[meio] < alvo:\n            esquerda = meio + 1\n        else:\n            direita = meio - 1\n    return -1\n\nprint(busca_binaria([1, 3, 5, 7, 9, 11], 7))  # 3",
           explicacao:"A cada iteração descarta metade da lista comparando com o elemento do meio — complexidade O(log n), muito mais rápido que busca linear para listas grandes já ordenadas."
+        },
+        {
+          enunciado:"Implemente a busca binária manualmente (sem usar bisect) para encontrar o índice de um valor em uma lista ordenada.",
+          solucao:"def busca_binaria(lista, alvo):\n    inicio, fim = 0, len(lista) - 1\n    while inicio <= fim:\n        meio = (inicio + fim) // 2\n        if lista[meio] == alvo:\n            return meio\n        elif lista[meio] < alvo:\n            inicio = meio + 1\n        else:\n            fim = meio - 1\n    return -1\n\nnumeros = [1, 3, 5, 7, 9, 11, 13]\nprint(busca_binaria(numeros, 9))  # 4",
+          explicacao:"A cada iteração, o intervalo de busca é dividido pela metade, descartando o lado onde o alvo não pode estar — isso dá complexidade O(log n), muito mais rápida que a busca linear."
+        },
+        {
+          enunciado:"Ordene uma lista de dicionários (produtos) por preço, e depois insira um novo produto na posição correta usando bisect.",
+          solucao:"import bisect\n\nprecos = [10.0, 25.5, 30.0, 45.0]\nnovo_preco = 28.0\n\nposicao = bisect.bisect_left(precos, novo_preco)\nbisect.insort(precos, novo_preco)\n\nprint(posicao)  # 2\nprint(precos)   # [10.0, 25.5, 28.0, 30.0, 45.0]",
+          explicacao:"bisect_left encontra a posição de inserção que mantém a lista ordenada, e insort insere o valor diretamente nessa posição — evita ter que ordenar a lista inteira de novo após cada inserção."
         }
       ]
     },
@@ -597,18 +670,11 @@ const DATA = {
       icon:"⟁", title:"Hash, Heap, BST & AVL", tags:"árvores · balanceamento · heapq",
       sub:"Estruturas de Dados",
       sections:[
-        {h:"Heap (fila de prioridade)", items:[
-          "Módulo <code>heapq</code> implementa min-heap sobre uma lista comum.",
-          "Inserção e remoção do menor elemento em O(log n)."
-        ]},
+        {h:"Heap (fila de prioridade)", items:["Módulo <code>heapq</code> implementa min-heap sobre uma lista comum.", "Inserção e remoção do menor elemento em O(log n)."]},
         {code:"import heapq\nfila = []\nheapq.heappush(fila, (2, \"tarefa B\"))\nheapq.heappush(fila, (1, \"tarefa A\"))\nprioridade = heapq.heappop(fila)  # (1, 'tarefa A')"},
-        {h:"BST / AVL (conceitual)", items:[
-          "BST: cada nó tem no máximo 2 filhos, esquerda < nó < direita — busca O(log n) no caso balanceado, O(n) no pior caso (árvore degenerada).",
-          "AVL é uma BST auto-balanceada: mantém a diferença de altura entre subárvores em no máximo 1, usando rotações."
-        ]},
-        {h:"Tabela hash", items:[
-          "Base do <code>dict</code>/<code>set</code> do Python: função hash mapeia chave → posição no array; colisões tratadas por open addressing."
-        ]}
+        {h:"BST / AVL (conceitual)", items:["BST: cada nó tem no máximo 2 filhos, esquerda < nó < direita — busca O(log n) no caso balanceado, O(n) no pior caso (árvore degenerada).", "AVL é uma BST auto-balanceada: mantém a diferença de altura entre subárvores em no máximo 1, usando rotações."]},
+        {code:"class NoAVL:\n    def __init__(self, valor):\n        self.valor = valor\n        self.esquerda = None\n        self.direita = None\n        self.altura = 1\n\ndef altura(no):\n    return no.altura if no else 0\n\ndef rotacionar_direita(y):\n    x = y.esquerda\n    y.esquerda = x.direita\n    x.direita = y\n    y.altura = 1 + max(altura(y.esquerda), altura(y.direita))\n    x.altura = 1 + max(altura(x.esquerda), altura(x.direita))\n    return x  # x vira a nova raiz da subárvore, agora balanceada"},
+        {h:"Tabela hash", items:["Base do <code>dict</code>/<code>set</code> do Python: função hash mapeia chave → posição no array; colisões tratadas por open addressing."]}
       ],
       exercicios:[
         {
@@ -620,6 +686,16 @@ const DATA = {
           enunciado:"Implemente a inserção em uma BST simples (sem balanceamento) usando uma classe Node.",
           solucao:"class No:\n    def __init__(self, valor):\n        self.valor = valor\n        self.esquerda = None\n        self.direita = None\n\ndef inserir(raiz, valor):\n    if raiz is None:\n        return No(valor)\n    if valor < raiz.valor:\n        raiz.esquerda = inserir(raiz.esquerda, valor)\n    else:\n        raiz.direita = inserir(raiz.direita, valor)\n    return raiz\n\nraiz = None\nfor v in [5, 3, 8, 1, 4]:\n    raiz = inserir(raiz, v)",
           explicacao:"A inserção é recursiva: compara o valor com o nó atual e desce para a esquerda (menor) ou direita (maior/igual) até achar um espaço vazio (None) para criar o novo nó."
+        },
+        {
+          enunciado:"Use heapq para implementar uma fila de prioridade que sempre retorna a tarefa mais urgente primeiro (menor número = mais urgente).",
+          solucao:"import heapq\n\ntarefas = []\nheapq.heappush(tarefas, (3, \"Revisar código\"))\nheapq.heappush(tarefas, (1, \"Corrigir bug crítico\"))\nheapq.heappush(tarefas, (2, \"Escrever testes\"))\n\nwhile tarefas:\n    prioridade, tarefa = heapq.heappop(tarefas)\n    print(f\"[{prioridade}] {tarefa}\")",
+          explicacao:"heapq mantém a lista como um heap-mínimo: heappop sempre remove o menor elemento (aqui, a tupla com menor prioridade), sem precisar reordenar a lista inteira a cada operação."
+        },
+        {
+          enunciado:"Implemente uma função que insere um valor em uma BST (árvore binária de busca) simples, mantendo a propriedade de ordenação.",
+          solucao:"class No:\n    def __init__(self, valor):\n        self.valor = valor\n        self.esquerda = None\n        self.direita = None\n\ndef inserir(raiz, valor):\n    if raiz is None:\n        return No(valor)\n    if valor < raiz.valor:\n        raiz.esquerda = inserir(raiz.esquerda, valor)\n    else:\n        raiz.direita = inserir(raiz.direita, valor)\n    return raiz\n\nraiz = None\nfor v in [50, 30, 70, 20, 40]:\n    raiz = inserir(raiz, v)\nprint(raiz.valor, raiz.esquerda.valor, raiz.direita.valor)  # 50 30 70",
+          explicacao:"Cada valor menor que o nó atual vai para a subárvore esquerda, e valores maiores ou iguais vão para a direita — essa regra recursiva mantém a árvore sempre ordenada para buscas eficientes."
         }
       ]
     }
@@ -629,19 +705,10 @@ const DATA = {
       icon:"⊞", title:"POO em Python", tags:"classes · herança · dataclasses",
       sub:"Orientação a Objetos",
       sections:[
-        {h:"Classe básica", items:[
-          "<code>__init__</code> é o construtor; <code>self</code> é a instância atual (sempre explícito, diferente de outras linguagens).",
-          "Métodos com <code>__nome__</code> são \"dunder methods\" — protocolos especiais (<code>__str__</code>, <code>__eq__</code>, <code>__len__</code>)."
-        ]},
+        {h:"Classe básica", items:["<code>__init__</code> é o construtor; <code>self</code> é a instância atual (sempre explícito, diferente de outras linguagens).", "Métodos com <code>__nome__</code> são \"dunder methods\" — protocolos especiais (<code>__str__</code>, <code>__eq__</code>, <code>__len__</code>)."]},
         {code:"from dataclasses import dataclass\n\n@dataclass\nclass Usuario:\n    nome: str\n    idade: int\n    ativo: bool = True\n\n    def aniversario(self):\n        self.idade += 1"},
-        {h:"Herança", items:[
-          "<code>class Admin(Usuario):</code> herda atributos e métodos.",
-          "<code>super().__init__(...)</code> chama o construtor da classe pai.",
-          "Python permite herança múltipla — resolvida pela MRO (Method Resolution Order)."
-        ]},
-        {h:"Encapsulamento (convenção)", items:[
-          "Não existe <code>private</code> real: <code>_atributo</code> é \"protegido\" por convenção, <code>__atributo</code> ativa name mangling."
-        ]}
+        {h:"Herança", items:["<code>class Admin(Usuario):</code> herda atributos e métodos.", "<code>super().__init__(...)</code> chama o construtor da classe pai.", "Python permite herança múltipla — resolvida pela MRO (Method Resolution Order)."]},
+        {h:"Encapsulamento (convenção)", items:["Não existe <code>private</code> real: <code>_atributo</code> é \"protegido\" por convenção, <code>__atributo</code> ativa name mangling."]}
       ],
       pitfall:"<code>@dataclass</code> reduz boilerplate de <code>__init__</code>/<code>__repr__</code>/<code>__eq__</code>, mas ainda sofre com o mesmo problema de mutável-como-padrão: use <code>field(default_factory=list)</code>.",
       exercicios:[
@@ -654,6 +721,16 @@ const DATA = {
           enunciado:"Crie uma classe Animal com método fazer_som(), e duas subclasses Cachorro e Gato que sobrescrevem esse método (polimorfismo).",
           solucao:"class Animal:\n    def fazer_som(self):\n        raise NotImplementedError\n\nclass Cachorro(Animal):\n    def fazer_som(self):\n        return \"Au au!\"\n\nclass Gato(Animal):\n    def fazer_som(self):\n        return \"Miau!\"\n\nfor animal in [Cachorro(), Gato()]:\n    print(animal.fazer_som())",
           explicacao:"Cada subclasse implementa fazer_som() à sua maneira, mas o código que percorre a lista chama o mesmo método sem saber (nem precisar saber) qual classe concreta está por trás — isso é polimorfismo."
+        },
+        {
+          enunciado:"Crie uma classe ContaBancaria com métodos depositar e sacar, impedindo saques que deixem o saldo negativo.",
+          solucao:"class ContaBancaria:\n    def __init__(self, saldo_inicial=0):\n        self.saldo = saldo_inicial\n\n    def depositar(self, valor):\n        self.saldo += valor\n\n    def sacar(self, valor):\n        if valor > self.saldo:\n            raise ValueError(\"Saldo insuficiente\")\n        self.saldo -= valor\n\nconta = ContaBancaria(100)\nconta.depositar(50)\nconta.sacar(30)\nprint(conta.saldo)  # 120",
+          explicacao:"Encapsular a lógica de validação dentro do método sacar garante que o saldo nunca fique inconsistente, não importa de onde o método seja chamado no programa."
+        },
+        {
+          enunciado:"Crie uma classe Animal e duas subclasses (Cachorro, Gato) que sobrescrevem um método emitir_som(), demonstrando polimorfismo.",
+          solucao:"class Animal:\n    def emitir_som(self):\n        return \"...\"\n\nclass Cachorro(Animal):\n    def emitir_som(self):\n        return \"Au au!\"\n\nclass Gato(Animal):\n    def emitir_som(self):\n        return \"Miau!\"\n\nanimais = [Cachorro(), Gato(), Animal()]\nfor animal in animais:\n    print(animal.emitir_som())",
+          explicacao:"Polimorfismo permite chamar animal.emitir_som() sem saber o tipo exato do objeto — cada subclasse fornece sua própria implementação, e o Python escolhe a correta automaticamente em tempo de execução."
         }
       ]
     },
@@ -661,18 +738,10 @@ const DATA = {
       icon:"⚑", title:"Tratamento de Exceções", tags:"try/except · raise · custom errors",
       sub:"Orientação a Objetos",
       sections:[
-        {h:"Estrutura", items:[
-          "<code>try / except / else / finally</code> — <code>else</code> roda se não houve exceção, <code>finally</code> roda sempre.",
-          "Capture exceções específicas primeiro; <code>except Exception:</code> genérico só como último recurso."
-        ]},
+        {h:"Estrutura", items:["<code>try / except / else / finally</code> — <code>else</code> roda se não houve exceção, <code>finally</code> roda sempre.", "Capture exceções específicas primeiro; <code>except Exception:</code> genérico só como último recurso."]},
         {code:"try:\n    resultado = 10 / divisor\nexcept ZeroDivisionError:\n    resultado = None\nexcept TypeError as e:\n    print(f\"tipo inválido: {e}\")\nelse:\n    print(\"deu certo\")\nfinally:\n    print(\"sempre executa\")"},
-        {h:"Exceções customizadas", items:[
-          "Crie subclasses de <code>Exception</code> para erros de domínio: mais expressivo que checar strings de erro.",
-          "<code>raise ValorInvalido(\"mensagem\") from erro_original</code> preserva a causa original."
-        ]},
-        {h:"Context managers", items:[
-          "<code>with open(arquivo) as f:</code> garante fechamento mesmo se der erro — evite gerenciar recursos manualmente com try/finally."
-        ]}
+        {h:"Exceções customizadas", items:["Crie subclasses de <code>Exception</code> para erros de domínio: mais expressivo que checar strings de erro.", "<code>raise ValorInvalido(\"mensagem\") from erro_original</code> preserva a causa original."]},
+        {h:"Context managers", items:["<code>with open(arquivo) as f:</code> garante fechamento mesmo se der erro — evite gerenciar recursos manualmente com try/finally."]}
       ],
       exercicios:[
         {
@@ -684,6 +753,16 @@ const DATA = {
           enunciado:"Crie uma exceção customizada SaldoInsuficienteError e lance-a numa função de saque quando o valor exceder o saldo.",
           solucao:"class SaldoInsuficienteError(Exception):\n    pass\n\ndef sacar(saldo, valor):\n    if valor > saldo:\n        raise SaldoInsuficienteError(f\"saldo {saldo} é menor que {valor}\")\n    return saldo - valor\n\ntry:\n    sacar(100, 150)\nexcept SaldoInsuficienteError as e:\n    print(f\"Operação negada: {e}\")",
           explicacao:"Uma exceção customizada deixa o código de quem chama a função mais expressivo: dá pra capturar especificamente esse erro de domínio em vez de um ValueError genérico que poderia significar qualquer coisa."
+        },
+        {
+          enunciado:"Escreva uma função que divide dois números e trata especificamente o erro de divisão por zero e o erro de tipo inválido.",
+          solucao:"def dividir_seguro(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        print(\"Erro: divisão por zero\")\n        return None\n    except TypeError:\n        print(\"Erro: os valores devem ser números\")\n        return None\n\nprint(dividir_seguro(10, 2))   # 5.0\nprint(dividir_seguro(10, 0))   # Erro: divisão por zero -> None\nprint(dividir_seguro(10, \"a\")) # Erro: os valores devem ser números -> None",
+          explicacao:"Ter blocos except separados para cada tipo de exceção permite mensagens específicas e tratamentos diferentes, em vez de capturar tudo genericamente com um único except Exception."
+        },
+        {
+          enunciado:"Crie uma exceção customizada SaldoInsuficienteError e use-a em uma função de saque.",
+          solucao:"class SaldoInsuficienteError(Exception):\n    pass\n\ndef sacar(saldo, valor):\n    if valor > saldo:\n        raise SaldoInsuficienteError(f\"Saldo de {saldo} é menor que o saque de {valor}\")\n    return saldo - valor\n\ntry:\n    sacar(100, 150)\nexcept SaldoInsuficienteError as e:\n    print(f\"Operação negada: {e}\")",
+          explicacao:"Criar uma exceção customizada (herdando de Exception) deixa o código mais expressivo: quem lê o except sabe exatamente qual regra de negócio falhou, em vez de um ValueError genérico."
         }
       ]
     }
@@ -693,15 +772,9 @@ const DATA = {
       icon:"▣", title:"Módulos, Pacotes & venv", tags:"pip · requirements · imports",
       sub:"Ecossistema",
       sections:[
-        {h:"Ambientes virtuais", items:[
-          "Sempre isole dependências por projeto: <code>python -m venv .venv</code> e ative antes de instalar pacotes.",
-          "<code>pip freeze > requirements.txt</code> registra versões exatas para reprodutibilidade."
-        ]},
+        {h:"Ambientes virtuais", items:["Sempre isole dependências por projeto: <code>python -m venv .venv</code> e ative antes de instalar pacotes.", "<code>pip freeze > requirements.txt</code> registra versões exatas para reprodutibilidade."]},
         {code:"python -m venv .venv\nsource .venv/bin/activate   # Linux/Mac\npip install fastapi uvicorn sqlalchemy\npip freeze > requirements.txt"},
-        {h:"Imports", items:[
-          "Import absoluto (<code>from app.models import Usuario</code>) é preferível a relativo em projetos maiores.",
-          "<code>if __name__ == \"__main__\":</code> evita que código rode ao importar o módulo em outro lugar."
-        ]}
+        {h:"Imports", items:["Import absoluto (<code>from app.models import Usuario</code>) é preferível a relativo em projetos maiores.", "<code>if __name__ == \"__main__\":</code> evita que código rode ao importar o módulo em outro lugar."]}
       ],
       exercicios:[
         {
@@ -713,6 +786,16 @@ const DATA = {
           enunciado:"Organize um pacote chamado app/ com dois módulos: app/models.py (classe Usuario) e app/services.py (função criar_usuario). Mostre os imports entre eles.",
           solucao:"# app/__init__.py\n# (arquivo vazio, apenas marca app/ como pacote)\n\n# app/models.py\nclass Usuario:\n    def __init__(self, nome):\n        self.nome = nome\n\n# app/services.py\nfrom app.models import Usuario\n\ndef criar_usuario(nome):\n    return Usuario(nome)\n\n# main.py (na raiz do projeto)\nfrom app.services import criar_usuario\n\nusuario = criar_usuario(\"Gabriel\")\nprint(usuario.nome)",
           explicacao:"O arquivo __init__.py (mesmo vazio) marca a pasta app/ como um pacote Python importável. O import absoluto from app.models import Usuario funciona porque main.py está na raiz do projeto, no mesmo nível de app/."
+        },
+        {
+          enunciado:"Escreva os comandos de terminal para criar um ambiente virtual, ativá-lo e instalar a biblioteca requests dentro dele.",
+          solucao:"python -m venv venv\nsource venv/bin/activate   # Linux/macOS\n# venv\\Scripts\\activate    # Windows\n\npip install requests\npip freeze > requirements.txt",
+          explicacao:"python -m venv venv cria o ambiente isolado; ativá-lo faz o pip instalar pacotes só ali dentro (não no sistema todo); pip freeze salva as versões exatas usadas no projeto para reprodutibilidade."
+        },
+        {
+          enunciado:"Organize um pacote chamado calculadora com dois módulos (operacoes.py e historico.py) e um arquivo principal que os utiliza.",
+          solucao:"# calculadora/operacoes.py\ndef somar(a, b):\n    return a + b\n\n# calculadora/historico.py\nregistro = []\n\ndef registrar(operacao):\n    registro.append(operacao)\n\n# main.py\nfrom calculadora.operacoes import somar\nfrom calculadora.historico import registrar\n\nresultado = somar(2, 3)\nregistrar(f\"2 + 3 = {resultado}\")\nprint(resultado)",
+          explicacao:"Separar responsabilidades em módulos diferentes dentro do mesmo pacote (calculadora/) deixa o código organizado e reutilizável — cada arquivo faz uma coisa, e o main.py apenas os conecta."
         }
       ]
     },
@@ -720,15 +803,9 @@ const DATA = {
       icon:"✓", title:"Testes com pytest", tags:"fixtures · asserts · TDD",
       sub:"Ecossistema",
       sections:[
-        {h:"Estrutura básica", items:[
-          "Arquivos <code>test_*.py</code>, funções <code>test_*</code> — pytest descobre e roda automaticamente.",
-          "Use <code>assert</code> simples; pytest reescreve para mostrar diffs detalhados na falha."
-        ]},
+        {h:"Estrutura básica", items:["Arquivos <code>test_*.py</code>, funções <code>test_*</code> — pytest descobre e roda automaticamente.", "Use <code>assert</code> simples; pytest reescreve para mostrar diffs detalhados na falha."]},
         {code:"import pytest\n\ndef test_soma():\n    assert somar(2, 3) == 5\n\n@pytest.fixture\ndef cliente_api():\n    from fastapi.testclient import TestClient\n    return TestClient(app)\n\ndef test_endpoint(cliente_api):\n    resp = cliente_api.get(\"/status\")\n    assert resp.status_code == 200"},
-        {h:"Fixtures & parametrize", items:[
-          "Fixtures compartilham setup entre testes sem duplicar código.",
-          "<code>@pytest.mark.parametrize</code> roda o mesmo teste com várias entradas diferentes."
-        ]}
+        {h:"Fixtures & parametrize", items:["Fixtures compartilham setup entre testes sem duplicar código.", "<code>@pytest.mark.parametrize</code> roda o mesmo teste com várias entradas diferentes."]}
       ],
       pitfall:"Testes que dependem de ordem de execução ou de estado global costumam quebrar silenciosamente. Cada teste deve poder rodar isolado — fixtures com <code>yield</code> ajudam a limpar estado depois.",
       exercicios:[
@@ -741,6 +818,16 @@ const DATA = {
           enunciado:"Use uma fixture para criar uma lista de tarefas antes de cada teste, garantindo que cada teste comece do mesmo estado.",
           solucao:"import pytest\n\n@pytest.fixture\ndef tarefas():\n    return [\"Estudar\", \"Fazer exercícios\", \"Revisar\"]\n\ndef test_tamanho_inicial(tarefas):\n    assert len(tarefas) == 3\n\ndef test_adicionar_tarefa(tarefas):\n    tarefas.append(\"Descansar\")\n    assert \"Descansar\" in tarefas\n    assert len(tarefas) == 4",
           explicacao:"A fixture tarefas roda de novo para cada função de teste que a recebe como parâmetro, então test_adicionar_tarefa não afeta o estado inicial visto por test_tamanho_inicial — cada teste fica isolado."
+        },
+        {
+          enunciado:"Escreva uma função soma(a, b) e um teste com pytest que verifica três casos diferentes usando parametrize.",
+          solucao:"# operacoes.py\ndef soma(a, b):\n    return a + b\n\n# test_operacoes.py\nimport pytest\nfrom operacoes import soma\n\n@pytest.mark.parametrize(\"a, b, esperado\", [\n    (2, 3, 5),\n    (-1, 1, 0),\n    (0, 0, 0),\n])\ndef test_soma(a, b, esperado):\n    assert soma(a, b) == esperado",
+          explicacao:"@pytest.mark.parametrize roda o mesmo teste várias vezes com entradas diferentes, evitando escrever uma função de teste repetida para cada caso."
+        },
+        {
+          enunciado:"Escreva um teste que verifica se uma função lança ValueError ao receber um argumento inválido.",
+          solucao:"# validador.py\ndef validar_idade(idade):\n    if idade < 0:\n        raise ValueError(\"Idade não pode ser negativa\")\n    return idade\n\n# test_validador.py\nimport pytest\nfrom validador import validar_idade\n\ndef test_validar_idade_negativa():\n    with pytest.raises(ValueError):\n        validar_idade(-5)",
+          explicacao:"pytest.raises() é um context manager que verifica se o bloco dentro dele efetivamente lança a exceção esperada — se não lançar, o teste falha."
         }
       ]
     },
@@ -748,16 +835,11 @@ const DATA = {
       icon:"⇌", title:"Web & APIs com FastAPI", tags:"REST · Pydantic · JWT",
       sub:"Ecossistema",
       sections:[
-        {h:"Rota básica", items:[
-          "Tipagem dos parâmetros gera validação automática + documentação Swagger em <code>/docs</code>."
-        ]},
+        {h:"Rota básica", items:["Tipagem dos parâmetros gera validação automática + documentação Swagger em <code>/docs</code>."]},
         {code:"from fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\nclass Tarefa(BaseModel):\n    titulo: str\n    concluida: bool = False\n\n@app.post(\"/tarefas\")\nasync def criar_tarefa(tarefa: Tarefa):\n    return {\"id\": 1, **tarefa.model_dump()}"},
-        {h:"Async", items:[
-          "<code>async def</code> libera a thread durante I/O (DB, chamadas HTTP) — use <code>await</code> em toda operação assíncrona, senão o ganho desaparece."
-        ]},
-        {h:"Autenticação JWT", items:[
-          "Fluxo típico: login gera token assinado → cliente envia no header <code>Authorization: Bearer</code> → dependência do FastAPI decodifica e injeta o usuário na rota."
-        ]}
+        {h:"Async", items:["<code>async def</code> libera a thread durante I/O (DB, chamadas HTTP) — use <code>await</code> em toda operação assíncrona, senão o ganho desaparece."]},
+        {h:"Autenticação JWT", items:["Fluxo típico: login gera token assinado → cliente envia no header <code>Authorization: Bearer</code> → dependência do FastAPI decodifica e injeta o usuário na rota."]},
+        {code:"from fastapi import FastAPI, Depends, HTTPException\nfrom fastapi.security import OAuth2PasswordBearer\nimport jwt\n\napp = FastAPI()\noauth2_scheme = OAuth2PasswordBearer(tokenUrl=\"login\")\nSECRET = \"chave-secreta\"\n\ndef criar_token(usuario_id: int) -> str:\n    return jwt.encode({\"sub\": usuario_id}, SECRET, algorithm=\"HS256\")\n\ndef usuario_atual(token: str = Depends(oauth2_scheme)):\n    try:\n        payload = jwt.decode(token, SECRET, algorithms=[\"HS256\"])\n        return payload[\"sub\"]\n    except jwt.InvalidTokenError:\n        raise HTTPException(status_code=401, detail=\"Token inválido\")\n\n@app.get(\"/perfil\")\ndef perfil(usuario_id: int = Depends(usuario_atual)):\n    return {\"usuario_id\": usuario_id}"}
       ],
       exercicios:[
         {
@@ -769,6 +851,16 @@ const DATA = {
           enunciado:"Crie um modelo Pydantic Usuario com campos nome (str) e idade (int, deve ser >= 0) e uma rota POST que valide e retorne o usuário criado.",
           solucao:"from fastapi import FastAPI\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\n\nclass Usuario(BaseModel):\n    nome: str\n    idade: int = Field(ge=0)\n\n@app.post(\"/usuarios\")\nasync def criar_usuario(usuario: Usuario):\n    return usuario",
           explicacao:"Field(ge=0) declara a restrição direto no schema Pydantic (idade 'greater or equal' a 0). Se alguém enviar idade negativa, o FastAPI já retorna 422 automaticamente, sem precisar validar manualmente dentro da rota."
+        },
+        {
+          enunciado:"Crie um endpoint POST /usuarios que recebe um nome e email validados por um modelo Pydantic e retorna o usuário criado.",
+          solucao:"from fastapi import FastAPI\nfrom pydantic import BaseModel, EmailStr\n\napp = FastAPI()\n\nclass Usuario(BaseModel):\n    nome: str\n    email: EmailStr\n\n@app.post(\"/usuarios\")\ndef criar_usuario(usuario: Usuario):\n    return {\"mensagem\": \"Usuário criado\", \"usuario\": usuario}",
+          explicacao:"O modelo Pydantic (Usuario) valida automaticamente o corpo da requisição — se o email não for válido ou faltar o nome, o FastAPI retorna erro 422 antes mesmo de a função rodar."
+        },
+        {
+          enunciado:"Crie um endpoint GET /produtos/{id} que retorna 404 se o produto não existir em um dicionário simulando um banco de dados.",
+          solucao:"from fastapi import FastAPI, HTTPException\n\napp = FastAPI()\nprodutos = {1: \"Teclado\", 2: \"Mouse\"}\n\n@app.get(\"/produtos/{id}\")\ndef buscar_produto(id: int):\n    if id not in produtos:\n        raise HTTPException(status_code=404, detail=\"Produto não encontrado\")\n    return {\"id\": id, \"nome\": produtos[id]}",
+          explicacao:"HTTPException permite retornar códigos de status HTTP específicos (como 404) junto com uma mensagem de erro, seguindo o padrão REST de respostas semânticas."
         }
       ]
     },
@@ -776,17 +868,11 @@ const DATA = {
       icon:"⌬", title:"Banco de Dados: SQLAlchemy", tags:"ORM · PostgreSQL · migrations",
       sub:"Ecossistema",
       sections:[
-        {h:"Modelo ORM", items:[
-          "Cada classe mapeia uma tabela; SQLAlchemy traduz operações Python em SQL."
-        ]},
+        {h:"Modelo ORM", items:["Cada classe mapeia uma tabela; SQLAlchemy traduz operações Python em SQL."]},
         {code:"from sqlalchemy.orm import declarative_base, Session\nfrom sqlalchemy import Column, Integer, String\n\nBase = declarative_base()\n\nclass Usuario(Base):\n    __tablename__ = \"usuarios\"\n    id = Column(Integer, primary_key=True)\n    nome = Column(String, nullable=False)"},
-        {h:"Sessões & transações", items:[
-          "Uma <code>Session</code> por requisição é o padrão em APIs — evita vazamento de estado entre usuários.",
-          "<code>session.commit()</code> confirma; <code>session.rollback()</code> desfaz em caso de erro."
-        ]},
-        {h:"Migrations com Alembic", items:[
-          "Alembic versiona mudanças de schema como código, permitindo aplicar/reverter em qualquer ambiente de forma reprodutível."
-        ]}
+        {h:"Sessões & transações", items:["Uma <code>Session</code> por requisição é o padrão em APIs — evita vazamento de estado entre usuários.", "<code>session.commit()</code> confirma; <code>session.rollback()</code> desfaz em caso de erro."]},
+        {h:"Migrations com Alembic", items:["Alembic versiona mudanças de schema como código, permitindo aplicar/reverter em qualquer ambiente de forma reprodutível."]},
+        {code:"# terminal\nalembic init alembic\nalembic revision --autogenerate -m \"cria tabela usuarios\"\nalembic upgrade head\n\n# alembic/versions/xxxx_cria_tabela_usuarios.py\ndef upgrade():\n    op.create_table(\n        \"usuarios\",\n        sa.Column(\"id\", sa.Integer, primary_key=True),\n        sa.Column(\"nome\", sa.String, nullable=False),\n    )\n\ndef downgrade():\n    op.drop_table(\"usuarios\")"}
       ],
       exercicios:[
         {
@@ -798,6 +884,16 @@ const DATA = {
           enunciado:"Crie e salve um novo usuário no banco, tratando o caso de erro com rollback.",
           solucao:"novo_usuario = Usuario(nome=\"Gabriel\")\n\ntry:\n    session.add(novo_usuario)\n    session.commit()\nexcept Exception:\n    session.rollback()\n    raise\nfinally:\n    session.close()",
           explicacao:"session.add() apenas marca o objeto para inserção; só o commit() de fato grava no banco. Se algo falhar entre o add e o commit, rollback() desfaz a transação para não deixar a sessão num estado inconsistente."
+        },
+        {
+          enunciado:"Defina um modelo Produto com id, nome e preço, e escreva uma query que busca todos os produtos com preço acima de 100.",
+          solucao:"from sqlalchemy.orm import declarative_base, Session\nfrom sqlalchemy import Column, Integer, String, Float\n\nBase = declarative_base()\n\nclass Produto(Base):\n    __tablename__ = \"produtos\"\n    id = Column(Integer, primary_key=True)\n    nome = Column(String, nullable=False)\n    preco = Column(Float, nullable=False)\n\n# session: Session\ncaros = session.query(Produto).filter(Produto.preco > 100).all()",
+          explicacao:"O método .filter() do SQLAlchemy traduz a comparação Python (Produto.preco > 100) em uma cláusula WHERE SQL, sem precisar escrever SQL manualmente."
+        },
+        {
+          enunciado:"Escreva uma query que atualiza o preço de um produto específico e faz commit da alteração.",
+          solucao:"# session: Session\nproduto = session.query(Produto).filter(Produto.id == 1).first()\n\nif produto:\n    produto.preco = 149.90\n    session.commit()\nelse:\n    print(\"Produto não encontrado\")",
+          explicacao:"Basta alterar o atributo do objeto Python (produto.preco = ...) — o SQLAlchemy rastreia essa mudança e gera o UPDATE correspondente quando session.commit() é chamado."
         }
       ]
     }
@@ -807,17 +903,9 @@ const DATA = {
       icon:"❝", title:"Strings Avançado", tags:"métodos · slicing · regex",
       sub:"Recursos Avançados",
       sections:[
-        {h:"Métodos essenciais", items:[
-          "Strings são imutáveis: todo método (<code>.upper()</code>, <code>.replace()</code>, <code>.strip()</code>) retorna uma <b>nova</b> string.",
-          "<code>.split(sep)</code> quebra em lista; <code>\" \".join(lista)</code> faz o caminho inverso.",
-          "<code>.find()</code> retorna -1 se não achar; <code>.index()</code> lança exceção — escolha conforme o caso."
-        ]},
+        {h:"Métodos essenciais", items:["Strings são imutáveis: todo método (<code>.upper()</code>, <code>.replace()</code>, <code>.strip()</code>) retorna uma <b>nova</b> string.", "<code>.split(sep)</code> quebra em lista; <code>\" \".join(lista)</code> faz o caminho inverso.", "<code>.find()</code> retorna -1 se não achar; <code>.index()</code> lança exceção — escolha conforme o caso."]},
         {code:"texto = \"  Python é ótimo  \"\nlimpo = texto.strip().lower()\npalavras = limpo.split()\nfrase = \"-\".join(palavras)\nprint(frase)  # 'python-é-ótimo'"},
-        {h:"Expressões regulares (re)", items:[
-          "<code>re.search()</code> acha a primeira ocorrência em qualquer posição; <code>re.match()</code> só casa no início da string.",
-          "<code>re.findall()</code> retorna todas as ocorrências como lista.",
-          "Para padrões usados repetidamente, <code>re.compile(padrao)</code> evita recompilar a cada chamada."
-        ]}
+        {h:"Expressões regulares (re)", items:["<code>re.search()</code> acha a primeira ocorrência em qualquer posição; <code>re.match()</code> só casa no início da string.", "<code>re.findall()</code> retorna todas as ocorrências como lista.", "Para padrões usados repetidamente, <code>re.compile(padrao)</code> evita recompilar a cada chamada."]}
       ],
       pitfall:"Concatenar strings com <code>+</code> dentro de um loop é O(n²) porque cria uma nova string a cada iteração. Para juntar muitos pedaços, acumule numa lista e use <code>\"\".join(lista)</code> no final.",
       exercicios:[
@@ -830,6 +918,16 @@ const DATA = {
           enunciado:"Valide se uma string é um e-mail simples no formato usuario@dominio.com usando regex.",
           solucao:"import re\n\npadrao = re.compile(r\"^[\\w.]+@[\\w]+\\.\\w+$\")\n\ndef eh_email_valido(texto):\n    return bool(padrao.match(texto))\n\nprint(eh_email_valido(\"gabriel@ufms.br\"))   # True\nprint(eh_email_valido(\"invalido@@x\"))       # False",
           explicacao:"O padrão exige: caracteres de palavra/ponto antes do @, um domínio sem espaços, um ponto e uma extensão. re.compile() pré-compila o padrão para reuso eficiente se a função for chamada muitas vezes."
+        },
+        {
+          enunciado:"Use expressões regulares para extrair todos os emails de um texto.",
+          solucao:"import re\n\ntexto = \"Contate ana@email.com ou suporte@empresa.com.br para ajuda\"\nemails = re.findall(r\"[\\w.-]+@[\\w.-]+\\.\\w+\", texto)\n\nprint(emails)  # ['ana@email.com', 'suporte@empresa.com.br']",
+          explicacao:"re.findall() retorna todas as ocorrências que casam com o padrão. O padrão [\\w.-]+@[\\w.-]+\\.\\w+ descreve o formato típico de um endereço de email."
+        },
+        {
+          enunciado:"Escreva uma função que formata um CPF (apenas números) no padrão 000.000.000-00.",
+          solucao:"def formatar_cpf(cpf: str) -> str:\n    cpf = cpf.zfill(11)\n    return f\"{cpf[:3]}.{cpf[3:6]}.{cpf[6:9]}-{cpf[9:]}\"\n\nprint(formatar_cpf(\"12345678900\"))  # 123.456.789-00",
+          explicacao:"zfill(11) garante que o CPF tenha 11 dígitos preenchendo com zeros à esquerda se necessário. O fatiamento em pedaços fixos monta a máscara de formatação padrão."
         }
       ]
     },
@@ -837,15 +935,9 @@ const DATA = {
       icon:"⟦", title:"Compreensões & Geradoras", tags:"list · dict · set · genexpr",
       sub:"Recursos Avançados",
       sections:[
-        {h:"List / Dict / Set comprehension", items:[
-          "Forma geral: <code>[expressao for item in iteravel if condicao]</code> — substitui um <code>for</code> + <code>append</code> em uma linha legível.",
-          "Funciona igual para dict (<code>{k: v for ...}</code>) e set (<code>{x for ...}</code>)."
-        ]},
+        {h:"List / Dict / Set comprehension", items:["Forma geral: <code>[expressao for item in iteravel if condicao]</code> — substitui um <code>for</code> + <code>append</code> em uma linha legível.", "Funciona igual para dict (<code>{k: v for ...}</code>) e set (<code>{x for ...}</code>)."]},
         {code:"matriz = [[1, 2], [3, 4], [5, 6]]\ntransposta = [[linha[i] for linha in matriz] for i in range(2)]\nprint(transposta)  # [[1, 3, 5], [2, 4, 6]]"},
-        {h:"Expressões geradoras", items:[
-          "<code>(x*2 for x in lista)</code> com parênteses cria um <b>gerador</b>: calcula item por item sob demanda, sem guardar tudo na memória.",
-          "Ideal para somar/filtrar grandes volumes de dados: <code>sum(x for x in numeros if x > 0)</code>."
-        ]}
+        {h:"Expressões geradoras", items:["<code>(x*2 for x in lista)</code> com parênteses cria um <b>gerador</b>: calcula item por item sob demanda, sem guardar tudo na memória.", "Ideal para somar/filtrar grandes volumes de dados: <code>sum(x for x in numeros if x > 0)</code>."]}
       ],
       pitfall:"Compreensões aninhadas em mais de 2 níveis ficam difíceis de ler. Se passar disso, prefira um <code>for</code> explícito — legibilidade importa mais que a linha única.",
       exercicios:[
@@ -858,6 +950,16 @@ const DATA = {
           enunciado:"Use uma expressão geradora para encontrar a soma dos quadrados dos números pares de 1 a 1000, sem criar uma lista intermediária.",
           solucao:"soma = sum(n**2 for n in range(1, 1001) if n % 2 == 0)\nprint(soma)",
           explicacao:"Sem os colchetes, a expressão dentro de sum() é uma generator expression: os quadrados são calculados um de cada vez e somados imediatamente, sem alocar uma lista de 500 elementos na memória."
+        },
+        {
+          enunciado:"Use uma list comprehension para gerar uma lista com os quadrados dos números pares de 1 a 20.",
+          solucao:"quadrados_pares = [n ** 2 for n in range(1, 21) if n % 2 == 0]\nprint(quadrados_pares)  # [4, 16, 36, 64, 100, 144, 196, 256, 324, 400]",
+          explicacao:"A cláusula if dentro da compreensão filtra apenas os números pares antes de elevá-los ao quadrado, tudo em uma única linha legível, sem laço for explícito com append."
+        },
+        {
+          enunciado:"Use uma dict comprehension para inverter as chaves e valores de um dicionário.",
+          solucao:"capitais = {\"Brasil\": \"Brasília\", \"França\": \"Paris\", \"Japão\": \"Tóquio\"}\n\ninvertido = {valor: chave for chave, valor in capitais.items()}\nprint(invertido)  # {'Brasília': 'Brasil', 'Paris': 'França', 'Tóquio': 'Japão'}",
+          explicacao:"A dict comprehension percorre os pares (chave, valor) com .items() e monta um novo dicionário com a ordem trocada — só funciona bem se os valores originais forem únicos."
         }
       ]
     },
@@ -865,16 +967,9 @@ const DATA = {
       icon:"λ", title:"Lambda & Funcional", tags:"map · filter · reduce",
       sub:"Recursos Avançados",
       sections:[
-        {h:"Funções lambda", items:[
-          "<code>lambda parametros: expressao</code> cria uma função anônima de uma única expressão (sem <code>return</code> explícito).",
-          "Úteis como argumento rápido para <code>sorted()</code>, <code>map()</code>, <code>filter()</code> — evite atribuir a uma variável (use <code>def</code> nesse caso)."
-        ]},
+        {h:"Funções lambda", items:["<code>lambda parametros: expressao</code> cria uma função anônima de uma única expressão (sem <code>return</code> explícito).", "Úteis como argumento rápido para <code>sorted()</code>, <code>map()</code>, <code>filter()</code> — evite atribuir a uma variável (use <code>def</code> nesse caso)."]},
         {code:"celsius = [0, 20, 37, 100]\nfahrenheit = list(map(lambda c: c * 9/5 + 32, celsius))\nprint(fahrenheit)  # [32.0, 68.0, 98.6, 212.0]"},
-        {h:"map, filter e functools", items:[
-          "<code>map(funcao, iteravel)</code> aplica a função a cada item; <code>filter(funcao, iteravel)</code> mantém só os que retornam <code>True</code>.",
-          "<code>functools.reduce(funcao, iteravel)</code> acumula um valor único aplicando a função par a par.",
-          "<code>functools.partial</code> \"congela\" alguns argumentos de uma função, criando uma versão especializada dela."
-        ]}
+        {h:"map, filter e functools", items:["<code>map(funcao, iteravel)</code> aplica a função a cada item; <code>filter(funcao, iteravel)</code> mantém só os que retornam <code>True</code>.", "<code>functools.reduce(funcao, iteravel)</code> acumula um valor único aplicando a função par a par.", "<code>functools.partial</code> \"congela\" alguns argumentos de uma função, criando uma versão especializada dela."]}
       ],
       pitfall:"Encadear muitos <code>map</code>/<code>filter</code> deixa o código difícil de ler em Python. Frequentemente uma list comprehension com <code>if</code> é mais clara e igualmente eficiente.",
       exercicios:[
@@ -887,6 +982,16 @@ const DATA = {
           enunciado:"Use functools.reduce para calcular o fatorial de um número.",
           solucao:"from functools import reduce\n\ndef fatorial(n):\n    return reduce(lambda acc, x: acc * x, range(1, n + 1), 1)\n\nprint(fatorial(5))  # 120",
           explicacao:"reduce aplica a lambda acumulando o resultado a cada passo: começa em 1 (valor inicial) e multiplica sucessivamente por 1, 2, 3, 4, 5 até sobrar um único valor final."
+        },
+        {
+          enunciado:"Use filter() e uma lambda para separar números positivos de uma lista.",
+          solucao:"numeros = [-5, 3, -2, 8, -1, 10]\n\npositivos = list(filter(lambda n: n > 0, numeros))\nprint(positivos)  # [3, 8, 10]",
+          explicacao:"filter() aplica a lambda a cada elemento e mantém apenas os que retornam True. list() converte o objeto filter (um iterador) de volta para uma lista visível."
+        },
+        {
+          enunciado:"Use reduce() para calcular o fatorial de um número.",
+          solucao:"from functools import reduce\n\ndef fatorial(n):\n    return reduce(lambda acc, x: acc * x, range(1, n + 1), 1)\n\nprint(fatorial(5))  # 120",
+          explicacao:"reduce() acumula um resultado aplicando a função a pares consecutivos: começa em 1 (valor inicial) e multiplica progressivamente por cada número de 1 até n."
         }
       ]
     },
@@ -894,15 +999,9 @@ const DATA = {
       icon:"↻", title:"Iteradores & Geradores", tags:"yield · __iter__ · __next__",
       sub:"Recursos Avançados",
       sections:[
-        {h:"Protocolo de iteração", items:[
-          "Um objeto iterável implementa <code>__iter__</code>; um iterador implementa <code>__iter__</code> e <code>__next__</code>, lançando <code>StopIteration</code> quando acaba.",
-          "É esse protocolo que faz o <code>for item in objeto:</code> funcionar por baixo dos panos."
-        ]},
+        {h:"Protocolo de iteração", items:["Um objeto iterável implementa <code>__iter__</code>; um iterador implementa <code>__iter__</code> e <code>__next__</code>, lançando <code>StopIteration</code> quando acaba.", "É esse protocolo que faz o <code>for item in objeto:</code> funcionar por baixo dos panos."]},
         {code:"class Contagem:\n    def __init__(self, inicio):\n        self.atual = inicio\n\n    def __iter__(self):\n        return self\n\n    def __next__(self):\n        if self.atual <= 0:\n            raise StopIteration\n        valor = self.atual\n        self.atual -= 1\n        return valor\n\nfor n in Contagem(3):\n    print(n)  # 3, 2, 1"},
-        {h:"Funções geradoras (yield)", items:[
-          "Uma função com <code>yield</code> vira um gerador: cada chamada a <code>next()</code> roda até o próximo <code>yield</code> e pausa ali, mantendo o estado.",
-          "Muito mais eficiente em memória que retornar uma lista gigante, pois gera os valores sob demanda (lazy evaluation)."
-        ]}
+        {h:"Funções geradoras (yield)", items:["Uma função com <code>yield</code> vira um gerador: cada chamada a <code>next()</code> roda até o próximo <code>yield</code> e pausa ali, mantendo o estado.", "Muito mais eficiente em memória que retornar uma lista gigante, pois gera os valores sob demanda (lazy evaluation)."]}
       ],
       pitfall:"Um gerador só pode ser percorrido <b>uma vez</b> — depois de esgotado, um novo <code>for</code> nele não produz nada. Se precisar reutilizar os valores, converta para lista ou recrie o gerador.",
       exercicios:[
@@ -915,6 +1014,16 @@ const DATA = {
           enunciado:"Crie uma classe ContagemRegressiva que funcione como iterador, contando de N até 1.",
           solucao:"class ContagemRegressiva:\n    def __init__(self, n):\n        self.n = n\n\n    def __iter__(self):\n        return self\n\n    def __next__(self):\n        if self.n <= 0:\n            raise StopIteration\n        valor = self.n\n        self.n -= 1\n        return valor\n\nfor v in ContagemRegressiva(5):\n    print(v)  # 5, 4, 3, 2, 1",
           explicacao:"__next__ é chamado automaticamente a cada volta do for; quando levanta StopIteration, o Python entende que o loop deve parar — não é um erro, é o sinal de fim de iteração."
+        },
+        {
+          enunciado:"Crie um gerador que produz os números da sequência de Fibonacci indefinidamente, usando yield.",
+          solucao:"def fibonacci():\n    a, b = 0, 1\n    while True:\n        yield a\n        a, b = b, a + b\n\ngen = fibonacci()\nprimeiros_10 = [next(gen) for _ in range(10)]\nprint(primeiros_10)  # [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]",
+          explicacao:"yield pausa a função e devolve um valor a cada chamada de next(), mantendo o estado (a, b) entre as chamadas — permite gerar uma sequência infinita sem guardar tudo na memória."
+        },
+        {
+          enunciado:"Implemente uma classe Contador que seja um iterador customizado, contando de 1 até um limite definido.",
+          solucao:"class Contador:\n    def __init__(self, limite):\n        self.atual = 0\n        self.limite = limite\n\n    def __iter__(self):\n        return self\n\n    def __next__(self):\n        if self.atual >= self.limite:\n            raise StopIteration\n        self.atual += 1\n        return self.atual\n\nfor numero in Contador(5):\n    print(numero)  # 1 2 3 4 5",
+          explicacao:"__iter__ retorna o próprio objeto (tornando-o iterável), e __next__ define a lógica de cada passo, lançando StopIteration quando não há mais itens — é assim que o for sabe quando parar."
         }
       ]
     },
@@ -922,14 +1031,9 @@ const DATA = {
       icon:"@", title:"Decoradores", tags:"functools.wraps · closures",
       sub:"Recursos Avançados",
       sections:[
-        {h:"O que é um decorador", items:[
-          "É uma função que recebe outra função e retorna uma versão modificada dela — a sintaxe <code>@decorador</code> antes de <code>def</code> é açúcar sintático para <code>funcao = decorador(funcao)</code>.",
-          "Usa <code>*args, **kwargs</code> na função interna para funcionar com qualquer assinatura."
-        ]},
+        {h:"O que é um decorador", items:["É uma função que recebe outra função e retorna uma versão modificada dela — a sintaxe <code>@decorador</code> antes de <code>def</code> é açúcar sintático para <code>funcao = decorador(funcao)</code>.", "Usa <code>*args, **kwargs</code> na função interna para funcionar com qualquer assinatura."]},
         {code:"import functools\nimport time\n\ndef cronometrar(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        inicio = time.perf_counter()\n        resultado = func(*args, **kwargs)\n        duracao = time.perf_counter() - inicio\n        print(f\"{func.__name__} levou {duracao:.4f}s\")\n        return resultado\n    return wrapper\n\n@cronometrar\ndef processar(n):\n    return sum(range(n))"},
-        {h:"Decoradores com parâmetros", items:[
-          "Para o decorador aceitar argumentos próprios, é preciso uma camada extra de função (uma \"fábrica de decoradores\")."
-        ]}
+        {h:"Decoradores com parâmetros", items:["Para o decorador aceitar argumentos próprios, é preciso uma camada extra de função (uma \"fábrica de decoradores\")."]}
       ],
       pitfall:"Esquecer <code>@functools.wraps(func)</code> faz a função decorada perder o <code>__name__</code> e a docstring originais, o que atrapalha debugging e ferramentas de documentação.",
       exercicios:[
@@ -942,6 +1046,16 @@ const DATA = {
           enunciado:"Crie um decorador repetir(n) que executa a função decorada n vezes seguidas.",
           solucao:"import functools\n\ndef repetir(n):\n    def decorador(func):\n        @functools.wraps(func)\n        def wrapper(*args, **kwargs):\n            resultado = None\n            for _ in range(n):\n                resultado = func(*args, **kwargs)\n            return resultado\n        return wrapper\n    return decorador\n\n@repetir(3)\ndef saudacao():\n    print(\"Olá!\")\n\nsaudacao()  # imprime 'Olá!' três vezes",
           explicacao:"repetir(3) é a fábrica: ela recebe o parâmetro n e retorna o decorador de verdade, que por sua vez recebe a função e retorna o wrapper. Essa camada extra é o que permite @repetir(3) em vez de só @repetir."
+        },
+        {
+          enunciado:"Crie um decorador que mede e imprime o tempo de execução de uma função.",
+          solucao:"import time\nimport functools\n\ndef medir_tempo(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        inicio = time.perf_counter()\n        resultado = func(*args, **kwargs)\n        duracao = time.perf_counter() - inicio\n        print(f\"{func.__name__} levou {duracao:.4f}s\")\n        return resultado\n    return wrapper\n\n@medir_tempo\ndef tarefa_lenta():\n    time.sleep(0.5)\n\ntarefa_lenta()",
+          explicacao:"O wrapper envolve a função original, cronometrando antes e depois de chamá-la. functools.wraps preserva o nome e docstring originais, que seriam perdidos sem ele."
+        },
+        {
+          enunciado:"Crie um decorador com parâmetro que repete a execução de uma função N vezes.",
+          solucao:"import functools\n\ndef repetir(vezes):\n    def decorador(func):\n        @functools.wraps(func)\n        def wrapper(*args, **kwargs):\n            for _ in range(vezes):\n                func(*args, **kwargs)\n        return wrapper\n    return decorador\n\n@repetir(3)\ndef saudacao():\n    print(\"Olá!\")\n\nsaudacao()  # imprime \"Olá!\" três vezes",
+          explicacao:"Um decorador que recebe parâmetros precisa de uma camada extra de função: repetir(vezes) retorna o decorador de verdade, que por sua vez retorna o wrapper — três níveis de aninhamento."
         }
       ]
     },
@@ -949,17 +1063,10 @@ const DATA = {
       icon:"⎘", title:"Arquivos & I/O", tags:"open · json · pathlib",
       sub:"Recursos Avançados",
       sections:[
-        {h:"Abrindo arquivos", items:[
-          "<code>with open(caminho, modo, encoding=\"utf-8\") as f:</code> garante o fechamento automático, mesmo se der erro no meio.",
-          "Modos comuns: <code>\"r\"</code> leitura, <code>\"w\"</code> escrita (sobrescreve), <code>\"a\"</code> anexa ao final."
-        ]},
+        {h:"Abrindo arquivos", items:["<code>with open(caminho, modo, encoding=\"utf-8\") as f:</code> garante o fechamento automático, mesmo se der erro no meio.", "Modos comuns: <code>\"r\"</code> leitura, <code>\"w\"</code> escrita (sobrescreve), <code>\"a\"</code> anexa ao final."]},
         {code:"with open(\"dados.txt\", \"w\", encoding=\"utf-8\") as f:\n    f.write(\"primeira linha\\n\")\n    f.write(\"segunda linha\\n\")\n\nwith open(\"dados.txt\", \"r\", encoding=\"utf-8\") as f:\n    for linha in f:\n        print(linha.strip())"},
-        {h:"JSON", items:[
-          "<code>json.dump(obj, f)</code> escreve um dicionário/lista como JSON no arquivo; <code>json.load(f)</code> faz o caminho inverso."
-        ]},
-        {h:"pathlib (forma moderna)", items:[
-          "<code>from pathlib import Path</code> — <code>Path(\"pasta\") / \"arquivo.txt\"</code> constrói caminhos de forma independente de sistema operacional, substituindo <code>os.path.join</code>."
-        ]}
+        {h:"JSON", items:["<code>json.dump(obj, f)</code> escreve um dicionário/lista como JSON no arquivo; <code>json.load(f)</code> faz o caminho inverso."]},
+        {h:"pathlib (forma moderna)", items:["<code>from pathlib import Path</code> — <code>Path(\"pasta\") / \"arquivo.txt\"</code> constrói caminhos de forma independente de sistema operacional, substituindo <code>os.path.join</code>."]}
       ],
       pitfall:"Não especificar <code>encoding=\"utf-8\"</code> pode causar erro ou corromper acentos, especialmente no Windows, onde o encoding padrão do sistema pode ser diferente de UTF-8.",
       exercicios:[
@@ -972,6 +1079,16 @@ const DATA = {
           enunciado:"Salve um dicionário de configurações como JSON e depois recarregue-o de volta em memória.",
           solucao:"import json\n\nconfig = {\"tema\": \"escuro\", \"notificacoes\": True, \"limite\": 100}\n\nwith open(\"config.json\", \"w\", encoding=\"utf-8\") as f:\n    json.dump(config, f, indent=2, ensure_ascii=False)\n\nwith open(\"config.json\", \"r\", encoding=\"utf-8\") as f:\n    config_carregado = json.load(f)\n\nprint(config_carregado[\"tema\"])  # escuro",
           explicacao:"indent=2 deixa o JSON legível para humanos, e ensure_ascii=False preserva acentos em vez de escapá-los como \\uXXXX. json.load reconstrói o dicionário Python original a partir do arquivo."
+        },
+        {
+          enunciado:"Leia um arquivo CSV linha por linha e calcule a soma de uma coluna numérica.",
+          solucao:"import csv\n\ntotal = 0\nwith open(\"vendas.csv\", newline=\"\", encoding=\"utf-8\") as arquivo:\n    leitor = csv.DictReader(arquivo)\n    for linha in leitor:\n        total += float(linha[\"valor\"])\n\nprint(f\"Total vendido: {total:.2f}\")",
+          explicacao:"csv.DictReader lê cada linha como um dicionário usando o cabeçalho como chaves, facilitando acessar a coluna 'valor' por nome em vez de por índice numérico."
+        },
+        {
+          enunciado:"Salve e depois carregue uma lista de dicionários em formato JSON usando pathlib para o caminho do arquivo.",
+          solucao:"import json\nfrom pathlib import Path\n\ndados = [{\"nome\": \"Ana\", \"idade\": 30}, {\"nome\": \"Bruno\", \"idade\": 25}]\ncaminho = Path(\"pessoas.json\")\n\ncaminho.write_text(json.dumps(dados, ensure_ascii=False, indent=2), encoding=\"utf-8\")\n\ncarregado = json.loads(caminho.read_text(encoding=\"utf-8\"))\nprint(carregado)",
+          explicacao:"Path.write_text() e .read_text() simplificam a leitura/escrita de arquivos sem precisar abrir e fechar manualmente com open(). json.dumps/loads convertem entre objeto Python e texto JSON."
         }
       ]
     },
@@ -979,19 +1096,10 @@ const DATA = {
       icon:"▦", title:"Módulos Padrão Úteis", tags:"datetime · collections · itertools",
       sub:"Recursos Avançados",
       sections:[
-        {h:"datetime", items:[
-          "<code>datetime.now()</code> retorna data/hora atual; <code>timedelta</code> representa uma duração e permite somar/subtrair de datas."
-        ]},
+        {h:"datetime", items:["<code>datetime.now()</code> retorna data/hora atual; <code>timedelta</code> representa uma duração e permite somar/subtrair de datas."]},
         {code:"from datetime import datetime, timedelta\n\nagora = datetime.now()\ndaqui_7_dias = agora + timedelta(days=7)\nprint(daqui_7_dias.strftime(\"%d/%m/%Y\"))"},
-        {h:"collections", items:[
-          "<code>Counter</code> conta ocorrências de itens automaticamente; <code>.most_common(n)</code> retorna os n mais frequentes.",
-          "<code>defaultdict(tipo)</code> cria um valor padrão automaticamente para chaves novas, evitando checagens manuais.",
-          "<code>namedtuple</code> cria tuplas com campos nomeados, mais legíveis que índices numéricos."
-        ]},
-        {h:"itertools", items:[
-          "<code>combinations(iteravel, r)</code> e <code>permutations(iteravel, r)</code> geram agrupamentos sem reimplementar o algoritmo.",
-          "<code>chain(lista1, lista2)</code> encadeia iteráveis sem criar uma lista concatenada intermediária."
-        ]}
+        {h:"collections", items:["<code>Counter</code> conta ocorrências de itens automaticamente; <code>.most_common(n)</code> retorna os n mais frequentes.", "<code>defaultdict(tipo)</code> cria um valor padrão automaticamente para chaves novas, evitando checagens manuais.", "<code>namedtuple</code> cria tuplas com campos nomeados, mais legíveis que índices numéricos."]},
+        {h:"itertools", items:["<code>combinations(iteravel, r)</code> e <code>permutations(iteravel, r)</code> geram agrupamentos sem reimplementar o algoritmo.", "<code>chain(lista1, lista2)</code> encadeia iteráveis sem criar uma lista concatenada intermediária."]}
       ],
       exercicios:[
         {
@@ -1003,6 +1111,16 @@ const DATA = {
           enunciado:"Use itertools.combinations para gerar todos os pares possíveis de uma lista de 4 jogadores para uma partida de dupla.",
           solucao:"from itertools import combinations\n\njogadores = [\"Ana\", \"Bruno\", \"Carla\", \"Diego\"]\npares = list(combinations(jogadores, 2))\nfor par in pares:\n    print(par)\n# ('Ana', 'Bruno'), ('Ana', 'Carla'), ('Ana', 'Diego'),\n# ('Bruno', 'Carla'), ('Bruno', 'Diego'), ('Carla', 'Diego')",
           explicacao:"combinations(lista, 2) gera todas as duplas possíveis sem repetir a ordem (ou seja, ('Ana','Bruno') aparece, mas não ('Bruno','Ana') de novo) — exatamente o que se espera de combinações, ao contrário de permutações."
+        },
+        {
+          enunciado:"Use datetime para calcular quantos dias faltam até uma data específica.",
+          solucao:"from datetime import date\n\nhoje = date.today()\naniversario = date(2026, 12, 25)\n\ndias_restantes = (aniversario - hoje).days\nprint(f\"Faltam {dias_restantes} dias\")",
+          explicacao:"Subtrair dois objetos date retorna um timedelta, cujo atributo .days dá a diferença em dias inteiros entre as duas datas."
+        },
+        {
+          enunciado:"Use collections.Counter para encontrar o elemento mais comum em uma lista.",
+          solucao:"from collections import Counter\n\ncompras = [\"maçã\", \"banana\", \"maçã\", \"uva\", \"maçã\", \"banana\"]\ncontador = Counter(compras)\n\nmais_comprado = contador.most_common(1)\nprint(mais_comprado)  # [('maçã', 3)]",
+          explicacao:"Counter conta automaticamente a frequência de cada item. most_common(n) retorna os n itens mais frequentes já ordenados, sem precisar implementar essa lógica manualmente."
         }
       ]
     },
@@ -1010,14 +1128,8 @@ const DATA = {
       icon:"⇶", title:"Async & Concorrência", tags:"asyncio · threading · GIL",
       sub:"Recursos Avançados",
       sections:[
-        {h:"GIL (Global Interpreter Lock)", items:[
-          "O CPython só executa bytecode Python de uma thread por vez, mesmo em máquinas multi-core.",
-          "Por isso: <code>threading</code> ajuda em tarefas de I/O (rede, disco), mas não acelera código CPU-bound — para isso use <code>multiprocessing</code>."
-        ]},
-        {h:"asyncio", items:[
-          "<code>async def</code> define uma corrotina; <code>await</code> pausa a execução até a operação assíncrona terminar, liberando o event loop para outras tarefas.",
-          "<code>asyncio.gather(tarefa1, tarefa2)</code> roda várias corrotinas concorrentemente e espera todas terminarem."
-        ]},
+        {h:"GIL (Global Interpreter Lock)", items:["O CPython só executa bytecode Python de uma thread por vez, mesmo em máquinas multi-core.", "Por isso: <code>threading</code> ajuda em tarefas de I/O (rede, disco), mas não acelera código CPU-bound — para isso use <code>multiprocessing</code>."]},
+        {h:"asyncio", items:["<code>async def</code> define uma corrotina; <code>await</code> pausa a execução até a operação assíncrona terminar, liberando o event loop para outras tarefas.", "<code>asyncio.gather(tarefa1, tarefa2)</code> roda várias corrotinas concorrentemente e espera todas terminarem."]},
         {code:"import asyncio\n\nasync def buscar_dado(id, atraso):\n    await asyncio.sleep(atraso)\n    return f\"dado {id}\"\n\nasync def main():\n    resultados = await asyncio.gather(\n        buscar_dado(1, 2),\n        buscar_dado(2, 1),\n    )\n    print(resultados)\n\nasyncio.run(main())"}
       ],
       pitfall:"Usar <code>time.sleep()</code> (bloqueante) dentro de uma <code>async def</code> trava o event loop inteiro, cancelando o ganho da concorrência. Dentro de código assíncrono, sempre use <code>await asyncio.sleep()</code>.",
@@ -1031,6 +1143,16 @@ const DATA = {
           enunciado:"Use threading para baixar 'simular' duas requisições de rede em paralelo, imprimindo quando cada uma termina.",
           solucao:"import threading\nimport time\n\ndef baixar(nome, atraso):\n    time.sleep(atraso)\n    print(f\"{nome} concluído após {atraso}s\")\n\nt1 = threading.Thread(target=baixar, args=(\"Recurso A\", 2))\nt2 = threading.Thread(target=baixar, args=(\"Recurso B\", 1))\n\nt1.start()\nt2.start()\nt1.join()\nt2.join()\nprint(\"Todas as threads terminaram\")",
           explicacao:"start() dispara cada thread para rodar em paralelo (bom aqui porque time.sleep libera o GIL); join() garante que o programa principal espere as duas terminarem antes de seguir para a última linha."
+        },
+        {
+          enunciado:"Escreva duas corrotinas assíncronas que simulam requisições e rodam em paralelo com asyncio.gather.",
+          solucao:"import asyncio\n\nasync def buscar_dados(nome, tempo):\n    await asyncio.sleep(tempo)\n    return f\"Dados de {nome}\"\n\nasync def main():\n    resultados = await asyncio.gather(\n        buscar_dados(\"API 1\", 1),\n        buscar_dados(\"API 2\", 2)\n    )\n    print(resultados)\n\nasyncio.run(main())",
+          explicacao:"asyncio.gather() executa as duas corrotinas concorrentemente — o tempo total é aproximadamente o da mais lenta (2s), não a soma das duas (3s), já que elas não bloqueiam uma à outra."
+        },
+        {
+          enunciado:"Use threading para baixar (simular) três arquivos ao mesmo tempo em threads separadas.",
+          solucao:"import threading\nimport time\n\ndef baixar(nome):\n    time.sleep(1)\n    print(f\"{nome} baixado\")\n\nthreads = [threading.Thread(target=baixar, args=(f\"arquivo{i}\",)) for i in range(3)]\n\nfor t in threads:\n    t.start()\nfor t in threads:\n    t.join()\n\nprint(\"Todos os downloads concluídos\")",
+          explicacao:".start() inicia cada thread em paralelo; .join() espera cada uma terminar antes de continuar. Para tarefas I/O-bound como downloads, threading funciona bem apesar do GIL."
         }
       ]
     },
@@ -1038,18 +1160,10 @@ const DATA = {
       icon:"⟡", title:"Métodos Mágicos (Dunder)", tags:"__str__ · __eq__ · __getitem__",
       sub:"Recursos Avançados",
       sections:[
-        {h:"Representação de objetos", items:[
-          "<code>__str__</code> define como o objeto aparece em <code>print()</code>/<code>str()</code> (voltado ao usuário); <code>__repr__</code> é a versão de debug (voltada ao programador), usada no console e dentro de listas.",
-          "Se só <code>__repr__</code> for definido, <code>str()</code> cai automaticamente nele — o inverso não acontece."
-        ]},
+        {h:"Representação de objetos", items:["<code>__str__</code> define como o objeto aparece em <code>print()</code>/<code>str()</code> (voltado ao usuário); <code>__repr__</code> é a versão de debug (voltada ao programador), usada no console e dentro de listas.", "Se só <code>__repr__</code> for definido, <code>str()</code> cai automaticamente nele — o inverso não acontece."]},
         {code:"class Ponto:\n    def __init__(self, x, y):\n        self.x, self.y = x, y\n\n    def __str__(self):\n        return f\"({self.x}, {self.y})\"\n\n    def __repr__(self):\n        return f\"Ponto(x={self.x}, y={self.y})\"\n\np = Ponto(2, 3)\nprint(p)        # (2, 3)\nprint([p])      # [Ponto(x=2, y=3)]"},
-        {h:"Comparação e operadores", items:[
-          "<code>__eq__</code> define o que <code>==</code> significa para a classe; <code>__lt__</code> permite usar <code>sorted()</code> diretamente nos objetos.",
-          "<code>functools.total_ordering</code> gera os outros operadores de comparação (<code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>) a partir de <code>__eq__</code> + <code>__lt__</code>."
-        ]},
-        {h:"Comportamento de coleção", items:[
-          "<code>__len__</code>, <code>__getitem__</code> e <code>__iter__</code> deixam um objeto custom se comportar como lista: aceitar <code>len(obj)</code>, <code>obj[0]</code> e <code>for x in obj</code>."
-        ]}
+        {h:"Comparação e operadores", items:["<code>__eq__</code> define o que <code>==</code> significa para a classe; <code>__lt__</code> permite usar <code>sorted()</code> diretamente nos objetos.", "<code>functools.total_ordering</code> gera os outros operadores de comparação (<code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>) a partir de <code>__eq__</code> + <code>__lt__</code>."]},
+        {h:"Comportamento de coleção", items:["<code>__len__</code>, <code>__getitem__</code> e <code>__iter__</code> deixam um objeto custom se comportar como lista: aceitar <code>len(obj)</code>, <code>obj[0]</code> e <code>for x in obj</code>."]}
       ],
       pitfall:"Definir <code>__eq__</code> sem definir <code>__hash__</code> torna o objeto <b>não-hashável</b> (não pode virar chave de dict ou item de set) — Python remove o hash padrão automaticamente nesse caso.",
       exercicios:[
@@ -1062,6 +1176,16 @@ const DATA = {
           enunciado:"Implemente uma classe Fila que suporte len(fila) e indexação fila[0] usando __len__ e __getitem__.",
           solucao:"class Fila:\n    def __init__(self):\n        self.itens = []\n\n    def adicionar(self, item):\n        self.itens.append(item)\n\n    def __len__(self):\n        return len(self.itens)\n\n    def __getitem__(self, indice):\n        return self.itens[indice]\n\nf = Fila()\nf.adicionar(\"a\")\nf.adicionar(\"b\")\nprint(len(f))    # 2\nprint(f[0])      # a",
           explicacao:"__getitem__ sozinho já é suficiente para tornar o objeto iterável em um for (Python usa índices crescentes até um IndexError), além de habilitar a sintaxe fila[i] diretamente."
+        },
+        {
+          enunciado:"Implemente uma classe Dinheiro com __add__ e __repr__ para permitir somar valores e exibi-los formatados.",
+          solucao:"class Dinheiro:\n    def __init__(self, valor):\n        self.valor = valor\n\n    def __add__(self, outro):\n        return Dinheiro(self.valor + outro.valor)\n\n    def __repr__(self):\n        return f\"R$ {self.valor:.2f}\"\n\ncarteira = Dinheiro(50) + Dinheiro(30.5)\nprint(carteira)  # R$ 80.50",
+          explicacao:"__repr__ define como o objeto aparece ao ser impresso ou inspecionado no console, enquanto __add__ permite usar o operador + diretamente entre instâncias da classe."
+        },
+        {
+          enunciado:"Implemente __contains__ em uma classe para permitir usar o operador in de forma customizada.",
+          solucao:"class Intervalo:\n    def __init__(self, inicio, fim):\n        self.inicio = inicio\n        self.fim = fim\n\n    def __contains__(self, valor):\n        return self.inicio <= valor <= self.fim\n\nfaixa = Intervalo(10, 20)\nprint(15 in faixa)  # True\nprint(25 in faixa)  # False",
+          explicacao:"__contains__ é chamado automaticamente quando se usa o operador in em uma instância da classe, permitindo definir uma lógica de pertencimento personalizada, como um intervalo numérico."
         }
       ]
     },
@@ -1069,18 +1193,10 @@ const DATA = {
       icon:"⊤", title:"Type Hints Avançado", tags:"Optional · Union · Generic",
       sub:"Recursos Avançados",
       sections:[
-        {h:"Tipos compostos", items:[
-          "<code>Optional[X]</code> equivale a <code>Union[X, None]</code> — indica que o valor pode ser do tipo X ou <code>None</code>.",
-          "Desde o Python 3.9, dá pra usar os genéricos nativos: <code>list[int]</code>, <code>dict[str, int]</code>, sem importar de <code>typing</code>."
-        ]},
+        {h:"Tipos compostos", items:["<code>Optional[X]</code> equivale a <code>Union[X, None]</code> — indica que o valor pode ser do tipo X ou <code>None</code>.", "Desde o Python 3.9, dá pra usar os genéricos nativos: <code>list[int]</code>, <code>dict[str, int]</code>, sem importar de <code>typing</code>."]},
         {code:"from typing import Optional\n\ndef buscar_usuario(id: int, usuarios: dict[int, str]) -> Optional[str]:\n    return usuarios.get(id)\n\nresultado = buscar_usuario(5, {1: \"Ana\"})\nprint(resultado)  # None"},
-        {h:"Generics", items:[
-          "<code>TypeVar</code> + classes genéricas permitem escrever uma estrutura de dados (como uma Pilha) que funciona com qualquer tipo, mantendo a checagem de tipo consistente."
-        ]},
-        {h:"Ferramentas", items:[
-          "Type hints não mudam o comportamento em runtime — quem verifica é uma ferramenta externa como <code>mypy</code>, rodada separadamente (<code>mypy arquivo.py</code>).",
-          "<code>Protocol</code> (do <code>typing</code>) permite tipar por comportamento (duck typing), sem exigir herança explícita de uma classe."
-        ]}
+        {h:"Generics", items:["<code>TypeVar</code> + classes genéricas permitem escrever uma estrutura de dados (como uma Pilha) que funciona com qualquer tipo, mantendo a checagem de tipo consistente."]},
+        {h:"Ferramentas", items:["Type hints não mudam o comportamento em runtime — quem verifica é uma ferramenta externa como <code>mypy</code>, rodada separadamente (<code>mypy arquivo.py</code>).", "<code>Protocol</code> (do <code>typing</code>) permite tipar por comportamento (duck typing), sem exigir herança explícita de uma classe."]}
       ],
       pitfall:"Type hints <b>não são reforçados</b> em tempo de execução — passar um <code>str</code> onde o hint pede <code>int</code> não gera erro automático; só ferramentas de análise estática como o mypy detectam a inconsistência antes de rodar.",
       exercicios:[
@@ -1093,6 +1209,16 @@ const DATA = {
           enunciado:"Crie uma classe genérica Pilha[T] usando TypeVar que funcione com qualquer tipo de dado.",
           solucao:"from typing import TypeVar, Generic\n\nT = TypeVar(\"T\")\n\nclass Pilha(Generic[T]):\n    def __init__(self):\n        self.itens: list[T] = []\n\n    def empilhar(self, item: T) -> None:\n        self.itens.append(item)\n\n    def desempilhar(self) -> T:\n        return self.itens.pop()\n\npilha_int: Pilha[int] = Pilha()\npilha_int.empilhar(10)\nprint(pilha_int.desempilhar())  # 10",
           explicacao:"Generic[T] permite que a mesma classe Pilha seja usada como Pilha[int], Pilha[str] etc., com o mypy checando que você não misture tipos incompatíveis dentro da mesma instância."
+        },
+        {
+          enunciado:"Escreva uma função tipada que recebe uma lista de números e retorna uma tupla com (mínimo, máximo).",
+          solucao:"def min_max(numeros: list[float]) -> tuple[float, float]:\n    return min(numeros), max(numeros)\n\nresultado = min_max([4.5, 2.1, 9.8, 3.3])\nprint(resultado)  # (2.1, 9.8)",
+          explicacao:"tuple[float, float] documenta que a função retorna exatamente dois floats — deixa explícito para quem usa a função o formato exato do retorno, sem precisar ler a implementação."
+        },
+        {
+          enunciado:"Use Union (ou o operador |) para tipar uma função que aceita tanto int quanto str como identificador.",
+          solucao:"from typing import Union\n\ndef buscar_usuario(id_ou_nome: Union[int, str]) -> str:\n    if isinstance(id_ou_nome, int):\n        return f\"Buscando por ID {id_ou_nome}\"\n    return f\"Buscando por nome {id_ou_nome}\"\n\nprint(buscar_usuario(42))\nprint(buscar_usuario(\"Gabriel\"))",
+          explicacao:"Union[int, str] (ou int | str no Python 3.10+) indica que o parâmetro aceita mais de um tipo. isinstance() dentro da função permite tratar cada tipo de forma diferente em runtime."
         }
       ]
     },
@@ -1100,14 +1226,9 @@ const DATA = {
       icon:"⎋", title:"Context Managers Customizados", tags:"with · __enter__ · __exit__",
       sub:"Recursos Avançados",
       sections:[
-        {h:"Protocolo with", items:[
-          "<code>__enter__</code> roda ao entrar no bloco <code>with</code> e retorna o recurso a ser usado; <code>__exit__</code> roda ao sair (mesmo se houve exceção) e cuida da limpeza.",
-          "<code>__exit__(self, exc_type, exc_val, exc_tb)</code> recebe detalhes da exceção, se houver uma."
-        ]},
+        {h:"Protocolo with", items:["<code>__enter__</code> roda ao entrar no bloco <code>with</code> e retorna o recurso a ser usado; <code>__exit__</code> roda ao sair (mesmo se houve exceção) e cuida da limpeza.", "<code>__exit__(self, exc_type, exc_val, exc_tb)</code> recebe detalhes da exceção, se houver uma."]},
         {code:"class Cronometro:\n    def __enter__(self):\n        import time\n        self.inicio = time.perf_counter()\n        return self\n\n    def __exit__(self, exc_type, exc_val, exc_tb):\n        import time\n        print(f\"Levou {time.perf_counter() - self.inicio:.4f}s\")\n\nwith Cronometro():\n    soma = sum(range(1_000_000))"},
-        {h:"contextlib.contextmanager", items:[
-          "Alternativa mais curta: uma função geradora decorada com <code>@contextmanager</code>, onde tudo antes do <code>yield</code> é o \"enter\" e tudo depois é o \"exit\"."
-        ]}
+        {h:"contextlib.contextmanager", items:["Alternativa mais curta: uma função geradora decorada com <code>@contextmanager</code>, onde tudo antes do <code>yield</code> é o \"enter\" e tudo depois é o \"exit\"."]}
       ],
       pitfall:"Se <code>__exit__</code> retornar <code>True</code>, a exceção que ocorreu dentro do bloco <code>with</code> é <b>suprimida</b> silenciosamente. Na maioria dos casos você quer deixá-la propagar (retornar <code>None</code> ou <code>False</code>).",
       exercicios:[
@@ -1120,6 +1241,16 @@ const DATA = {
           enunciado:"Crie um context manager que troque para um diretório temporariamente e volte ao original ao sair do bloco, mesmo se der erro.",
           solucao:"from contextlib import contextmanager\nimport os\n\n@contextmanager\ndef diretorio_temporario(caminho):\n    original = os.getcwd()\n    os.chdir(caminho)\n    try:\n        yield\n    finally:\n        os.chdir(original)\n\nwith diretorio_temporario(\"/tmp\"):\n    print(os.getcwd())  # /tmp\nprint(os.getcwd())      # volta ao diretório original",
           explicacao:"O try/finally ao redor do yield garante que os.chdir(original) rode mesmo se algo dentro do bloco with lançar uma exceção — a limpeza não fica condicionada ao código ter dado certo."
+        },
+        {
+          enunciado:"Implemente um context manager customizado (com __enter__ e __exit__) que cronometra um bloco de código.",
+          solucao:"import time\n\nclass Cronometro:\n    def __enter__(self):\n        self.inicio = time.perf_counter()\n        return self\n\n    def __exit__(self, tipo, valor, traceback):\n        duracao = time.perf_counter() - self.inicio\n        print(f\"Bloco levou {duracao:.4f}s\")\n\nwith Cronometro():\n    time.sleep(0.3)",
+          explicacao:"__enter__ roda ao entrar no with e __exit__ roda ao sair, mesmo que ocorra uma exceção dentro do bloco — por isso context managers são ideais para medir tempo ou garantir limpeza de recursos."
+        },
+        {
+          enunciado:"Use @contextmanager do módulo contextlib para criar a mesma funcionalidade de forma mais simples, com um gerador.",
+          solucao:"from contextlib import contextmanager\nimport time\n\n@contextmanager\ndef cronometro():\n    inicio = time.perf_counter()\n    yield\n    duracao = time.perf_counter() - inicio\n    print(f\"Bloco levou {duracao:.4f}s\")\n\nwith cronometro():\n    time.sleep(0.3)",
+          explicacao:"O código antes do yield equivale ao __enter__, e o código depois do yield equivale ao __exit__ — uma forma mais enxuta de escrever context managers sem criar uma classe inteira."
         }
       ]
     },
@@ -1127,15 +1258,10 @@ const DATA = {
       icon:"☰", title:"Enum & Unpacking Avançado", tags:"Enum · walrus · * **",
       sub:"Recursos Avançados",
       sections:[
-        {h:"Enum", items:[
-          "<code>from enum import Enum</code> cria um conjunto fechado de constantes nomeadas — mais seguro que usar strings soltas espalhadas pelo código (evita erros de digitação silenciosos)."
-        ]},
+        {h:"Enum", items:["<code>from enum import Enum</code> cria um conjunto fechado de constantes nomeadas — mais seguro que usar strings soltas espalhadas pelo código (evita erros de digitação silenciosos)."]},
         {code:"from enum import Enum\n\nclass StatusPedido(Enum):\n    PENDENTE = \"pendente\"\n    PAGO = \"pago\"\n    ENVIADO = \"enviado\"\n\ndef processar(status: StatusPedido):\n    if status == StatusPedido.PAGO:\n        print(\"Liberar envio\")\n\nprocessar(StatusPedido.PAGO)"},
-        {h:"Unpacking avançado", items:[
-          "<code>a, *resto = lista</code> captura o primeiro item em <code>a</code> e o restante em <code>resto</code> como lista.",
-          "<code>{**dict1, **dict2}</code> mescla dois dicionários num novo (chaves repetidas ficam com o valor do último).",
-          "O operador <code>:=</code> (walrus, Python 3.8+) atribui e retorna um valor na mesma expressão — útil para evitar chamar a mesma função duas vezes."
-        ]}
+        {h:"Unpacking avançado", items:["<code>a, *resto = lista</code> captura o primeiro item em <code>a</code> e o restante em <code>resto</code> como lista.", "<code>{**dict1, **dict2}</code> mescla dois dicionários num novo (chaves repetidas ficam com o valor do último).", "O operador <code>:=</code> (walrus, Python 3.8+) atribui e retorna um valor na mesma expressão — útil para evitar chamar a mesma função duas vezes."]},
+        {code:"dados = [1, 2, 3, 4, 5, 6, 7, 8]\n\n# sem walrus: len() é chamado duas vezes\nif len(dados) > 5:\n    print(f\"lista grande: {len(dados)} itens\")\n\n# com walrus: calcula uma vez e reaproveita na mesma expressão\nif (tamanho := len(dados)) > 5:\n    print(f\"lista grande: {tamanho} itens\")"}
       ],
       exercicios:[
         {
@@ -1147,6 +1273,16 @@ const DATA = {
           enunciado:"Use o operador walrus (:=) para ler linhas de uma lista simulando um arquivo até encontrar uma linha vazia, sem chamar a função de leitura duas vezes.",
           solucao:"linhas = iter([\"primeira\", \"segunda\", \"\", \"nunca lida\"])\n\nwhile (linha := next(linhas, \"\")) != \"\":\n    print(linha)\n# imprime: primeira, segunda",
           explicacao:"Sem o walrus, seria necessário chamar next(linhas) uma vez antes do while e outra vez dentro do loop (duplicando a chamada). Com :=, a atribuição e o teste da condição acontecem na mesma linha."
+        },
+        {
+          enunciado:"Crie uma Enum Status com os valores PENDENTE, EM_ANDAMENTO e CONCLUIDO, e escreva uma função que reage a cada status.",
+          solucao:"from enum import Enum\n\nclass Status(Enum):\n    PENDENTE = \"pendente\"\n    EM_ANDAMENTO = \"em_andamento\"\n    CONCLUIDO = \"concluido\"\n\ndef descrever(status: Status) -> str:\n    if status == Status.CONCLUIDO:\n        return \"Tarefa finalizada!\"\n    return f\"Tarefa ainda {status.value}\"\n\nprint(descrever(Status.EM_ANDAMENTO))  # Tarefa ainda em_andamento",
+          explicacao:"Enum evita usar strings soltas (\"pendente\", \"concluido\") espalhadas pelo código, que são propensas a erro de digitação — o autocomplete do editor também funciona melhor com Status.CONCLUIDO."
+        },
+        {
+          enunciado:"Use unpacking com * para separar o primeiro, o último e os elementos do meio de uma lista.",
+          solucao:"numeros = [10, 20, 30, 40, 50]\n\nprimeiro, *meio, ultimo = numeros\nprint(primeiro)  # 10\nprint(meio)      # [20, 30, 40]\nprint(ultimo)    # 50",
+          explicacao:"O operador * dentro do unpacking absorve todos os elementos que sobrarem em uma lista — aqui, tudo que não é o primeiro nem o último vai para meio."
         }
       ]
     },
@@ -1154,13 +1290,9 @@ const DATA = {
       icon:"⚙", title:"Multiprocessing", tags:"CPU-bound · Pool · Process",
       sub:"Recursos Avançados",
       sections:[
-        {h:"Quando usar", items:[
-          "Para tarefas <b>CPU-bound</b> (cálculo pesado), <code>threading</code> não ajuda por causa do GIL — cada processo do <code>multiprocessing</code> tem seu próprio interpretador Python e sua própria GIL, rodando de verdade em paralelo em núcleos diferentes."
-        ]},
+        {h:"Quando usar", items:["Para tarefas <b>CPU-bound</b> (cálculo pesado), <code>threading</code> não ajuda por causa do GIL — cada processo do <code>multiprocessing</code> tem seu próprio interpretador Python e sua própria GIL, rodando de verdade em paralelo em núcleos diferentes."]},
         {code:"from multiprocessing import Pool\n\ndef quadrado(n):\n    return n * n\n\nif __name__ == \"__main__\":\n    with Pool(processes=4) as pool:\n        resultados = pool.map(quadrado, range(10))\n    print(resultados)"},
-        {h:"Comunicação entre processos", items:[
-          "Processos não compartilham memória por padrão. Use <code>multiprocessing.Queue</code> para trocar mensagens ou <code>multiprocessing.shared_memory</code> para dados compartilhados de fato."
-        ]}
+        {h:"Comunicação entre processos", items:["Processos não compartilham memória por padrão. Use <code>multiprocessing.Queue</code> para trocar mensagens ou <code>multiprocessing.shared_memory</code> para dados compartilhados de fato."]}
       ],
       pitfall:"Argumentos e retornos entre processos precisam ser <b>\"picklable\"</b> (serializáveis) — funções <code>lambda</code> e certos objetos complexos não funcionam diretamente com <code>multiprocessing.Pool</code>.",
       exercicios:[
@@ -1173,6 +1305,16 @@ const DATA = {
           enunciado:"Compare o tempo de somar números primos até 100.000 de forma sequencial vs dividindo o trabalho em 4 processos.",
           solucao:"from multiprocessing import Pool\nimport time\n\ndef eh_primo(n):\n    if n < 2:\n        return False\n    return all(n % i != 0 for i in range(2, int(n**0.5) + 1))\n\ndef contar_primos(intervalo):\n    inicio, fim = intervalo\n    return sum(1 for n in range(inicio, fim) if eh_primo(n))\n\nif __name__ == \"__main__\":\n    faixas = [(0, 25000), (25000, 50000), (50000, 75000), (75000, 100000)]\n\n    inicio = time.perf_counter()\n    with Pool(processes=4) as pool:\n        resultados = pool.map(contar_primos, faixas)\n    print(f\"Paralelo: {sum(resultados)} primos em {time.perf_counter() - inicio:.2f}s\")",
           explicacao:"Dividir o intervalo em 4 faixas e processar cada uma num processo separado aproveita múltiplos núcleos de CPU de verdade — diferente de threading, que não ganharia velocidade nesse tipo de tarefa CPU-bound por causa do GIL."
+        },
+        {
+          enunciado:"Compare visualmente (via print) a ordem de execução ao rodar 3 tarefas com multiprocessing.Process em vez de Pool.",
+          solucao:"from multiprocessing import Process\nimport time\n\ndef tarefa(nome):\n    time.sleep(1)\n    print(f\"{nome} finalizada\")\n\nif __name__ == \"__main__\":\n    processos = [Process(target=tarefa, args=(f\"Tarefa {i}\",)) for i in range(3)]\n\n    for p in processos:\n        p.start()\n    for p in processos:\n        p.join()\n\n    print(\"Todas finalizadas\")",
+          explicacao:"Process cria um processo independente por tarefa (em vez de reaproveitar um pool fixo). start() dispara cada processo e join() espera todos terminarem antes de seguir em frente."
+        },
+        {
+          enunciado:"Use um multiprocessing.Manager para compartilhar uma lista entre processos e acumular resultados.",
+          solucao:"from multiprocessing import Process, Manager\n\ndef calcular_quadrado(n, resultados):\n    resultados.append(n ** 2)\n\nif __name__ == \"__main__\":\n    with Manager() as manager:\n        resultados = manager.list()\n        processos = [Process(target=calcular_quadrado, args=(n, resultados)) for n in range(5)]\n\n        for p in processos:\n            p.start()\n        for p in processos:\n            p.join()\n\n        print(list(resultados))",
+          explicacao:"Processos não compartilham memória por padrão — Manager().list() cria uma lista especial que pode ser lida e escrita com segurança por múltiplos processos ao mesmo tempo."
         }
       ]
     }
@@ -1200,7 +1342,7 @@ let lastFocused = null;
 function renderSections(sections){
   return sections.map(s => {
     if(s.code){
-      return `<pre><code>${escapeHtml(s.code)}</code></pre>`;
+      return `<pre><code>${highlightPython(s.code)}</code></pre>`;
     }
     const items = (s.items || []).map(it => `<li>${it}</li>`).join("");
     return `${s.h ? `<h4>${s.h}</h4>` : ""}<ul>${items}</ul>`;
@@ -1215,7 +1357,7 @@ function renderExercicios(exercicios){
       <details>
         <summary>Ver solução</summary>
         <div class="solucao">
-          <pre><code>${escapeHtml(ex.solucao)}</code></pre>
+          <pre><code>${highlightPython(ex.solucao)}</code></pre>
           <p class="explicacao">${ex.explicacao}</p>
         </div>
       </details>
@@ -1226,6 +1368,42 @@ function renderExercicios(exercicios){
 
 function escapeHtml(str){
   return str.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+}
+
+const PY_KEYWORDS = new Set(["def","class","import","from","as","if","elif","else","for","while","return","try","except","finally","raise","with","pass","break","continue","lambda","yield","None","True","False","and","or","not","in","is","global","nonlocal","assert","async","await","del"]);
+const PY_BUILTINS = new Set(["print","len","range","int","str","float","bool","dict","list","set","tuple","input","open","enumerate","zip","map","filter","sum","min","max","sorted","reversed","isinstance","issubclass","super","staticmethod","classmethod","property","type","object","Exception","ValueError","TypeError","KeyError","IndexError","StopIteration","self","cls"]);
+
+/* Tema Mayukai Mirage Gruvbox Darktooth aplicado como highlight de sintaxe Python */
+function highlightPython(code){
+  const tokenRe = /(#.*$)|((?:[rRbBfFuU]{1,2})?(?:"""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'))|(\b\d+\.?\d*\b)|([A-Za-z_][A-Za-z0-9_]*)/gm;
+  let out = "";
+  let last = 0;
+  let m;
+  while((m = tokenRe.exec(code)) !== null){
+    out += escapeHtml(code.slice(last, m.index));
+    last = tokenRe.lastIndex;
+    const [full, comment, str, num, ident] = m;
+    if(comment){
+      out += `<span class="tok-com">${escapeHtml(comment)}</span>`;
+    } else if(str){
+      out += `<span class="tok-str">${escapeHtml(str)}</span>`;
+    } else if(num){
+      out += `<span class="tok-num">${escapeHtml(num)}</span>`;
+    } else if(ident){
+      const followedByParen = code.slice(tokenRe.lastIndex).match(/^\s*\(/);
+      if(PY_KEYWORDS.has(ident)){
+        out += `<span class="tok-kw">${escapeHtml(ident)}</span>`;
+      } else if(followedByParen && !PY_KEYWORDS.has(ident)){
+        out += `<span class="tok-fn">${escapeHtml(ident)}</span>`;
+      } else if(PY_BUILTINS.has(ident)){
+        out += `<span class="tok-bi">${escapeHtml(ident)}</span>`;
+      } else {
+        out += escapeHtml(ident);
+      }
+    }
+  }
+  out += escapeHtml(code.slice(last));
+  return out;
 }
 
 function openCard(item){
